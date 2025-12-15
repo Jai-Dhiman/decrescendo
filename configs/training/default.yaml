@@ -1,0 +1,17 @@
+# Default training configuration
+learning_rate: 2e-5
+warmup_steps: 500
+weight_decay: 0.01
+max_grad_norm: 1.0
+
+num_epochs: 3
+eval_steps: 500
+save_steps: 1000
+logging_steps: 100
+
+# Loss weights
+loss_weights:
+  intent: 1.0
+  artist: 1.0
+  voice: 1.0
+  policy: 2.0  # Weight policy violations higher

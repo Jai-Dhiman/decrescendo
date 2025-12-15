@@ -1,0 +1,26 @@
+# Main Hydra configuration for Input Classifier training
+defaults:
+  - model: roberta_base
+  - training: default
+  - _self_
+
+# Experiment settings
+experiment:
+  name: "input_classifier_v1"
+  seed: 42
+  output_dir: "outputs/${experiment.name}"
+
+# Data settings
+data:
+  train_path: "data/train.jsonl"
+  eval_path: "data/eval.jsonl"
+  max_length: 512
+  batch_size: 16
+
+# Hydra settings
+hydra:
+  run:
+    dir: ${experiment.output_dir}
+  sweep:
+    dir: ${experiment.output_dir}/sweeps
+    subdir: ${hydra.job.num}
