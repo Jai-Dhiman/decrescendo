@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document tracks remaining tasks to complete the classifier components of Constitutional Audio.
+This document tracks the classifier components of Constitutional Audio.
+
+**Status: ALL TASKS COMPLETE**
 
 **Completed:**
 - Input Classifier (text prompts): model, pretrained loading, training pipeline, inference, tests
@@ -10,6 +12,10 @@ This document tracks remaining tasks to complete the classifier components of Co
 - Checkpointing: Input/Output classifier save/load, voice database persistence, tests
 - Output Classifier Training: audio dataset/dataloader, losses (harm BCE + speaker contrastive), trainer with BatchNorm, pretrained audio encoder support (MERT/WavLM), 48 tests
 - Unified Pipeline: ConstitutionalAudio class, classify_prompt/audio/generation methods, PipelineDecision enum, load_constitutional_audio factory
+- Integration Tests: 38 tests covering standalone classifiers, combined pipeline, decision aggregation, voice matching, performance benchmarks
+- CLI Interface: 5 commands (classify-prompt, classify-audio, enroll-voice, list-voices, serve) + FastAPI server + 36 tests
+
+**Total Tests: 221**
 
 ---
 
@@ -119,28 +125,32 @@ This document tracks remaining tasks to complete the classifier components of Co
 ### 4.2 End-to-End Tests
 **File:** `tests/test_pipeline.py`
 
-- [ ] Test input classifier standalone
-- [ ] Test output classifier standalone
-- [ ] Test combined pipeline with mock audio generation
-- [ ] Test decision aggregation (input + output decisions)
-- [ ] Test with protected voice matching
-- [ ] Performance/latency benchmarks
+- [x] Test input classifier standalone
+- [x] Test output classifier standalone
+- [x] Test combined pipeline with mock audio generation
+- [x] Test decision aggregation (input + output decisions)
+- [x] Test with protected voice matching
+- [x] Performance/latency benchmarks
 
 ### 4.3 CLI Interface
 **File:** `src/decrescendo/constitutional_audio/cli.py`
 
-- [ ] `classify-prompt` command: Classify text prompts
-- [ ] `classify-audio` command: Classify audio files
-- [ ] `enroll-voice` command: Add voice to protected database
-- [ ] `list-voices` command: Show enrolled protected voices
-- [ ] `serve` command: Start HTTP API server (optional)
-- [ ] Output formats: JSON, table, human-readable
+- [x] `classify-prompt` command: Classify text prompts
+- [x] `classify-audio` command: Classify audio files
+- [x] `enroll-voice` command: Add voice to protected database
+- [x] `list-voices` command: Show enrolled protected voices
+- [x] `serve` command: Start HTTP API server (FastAPI)
+- [x] Output formats: JSON, table, human-readable
 
 **Entry point in pyproject.toml:**
 ```toml
 [project.scripts]
 constitutional-audio = "decrescendo.constitutional_audio.cli:main"
 ```
+
+**API Server:** `src/decrescendo/constitutional_audio/api.py`
+- FastAPI endpoints for all classification and voice management operations
+- Install with `pip install decrescendo[serve]`
 
 ---
 
@@ -153,8 +163,8 @@ constitutional-audio = "decrescendo.constitutional_audio.cli:main"
 - [x] `tests/test_audio_training.py`: Training loop tests (10 tests)
 - [x] `tests/test_voice_database.py`: Voice database and enrollment tests (43 tests)
 - [x] `tests/test_checkpointing.py`: Save/load tests (22 tests)
-- [ ] `tests/test_pipeline.py`: Integration tests
-- [ ] `tests/test_cli.py`: CLI command tests
+- [x] `tests/test_pipeline.py`: Integration tests (38 tests)
+- [x] `tests/test_cli.py`: CLI command tests (36 tests)
 
 ---
 
@@ -165,8 +175,8 @@ constitutional-audio = "decrescendo.constitutional_audio.cli:main"
 | 1 | Checkpointing | Done | Enables saving trained models |
 | 2 | Output Classifier Training | Done | Core training functionality |
 | 3 | Protected Voice System | Done | Key safety feature |
-| 4 | Integration | In Progress | Pipeline done, tests pending |
-| 5 | CLI | Todo | User-facing interface |
+| 4 | Integration | Done | Pipeline + 38 integration tests |
+| 5 | CLI | Done | User-facing interface (5 commands + API server)
 
 ---
 
@@ -176,7 +186,8 @@ constitutional-audio = "decrescendo.constitutional_audio.cli:main"
 src/decrescendo/constitutional_audio/
     __init__.py
     pipeline.py                      # [done] Unified pipeline
-    cli.py                           # [todo] Command-line interface
+    cli.py                           # [done] Command-line interface (5 commands)
+    api.py                           # [done] FastAPI server
 
     input_classifier/
         __init__.py
@@ -218,6 +229,8 @@ tests/
     test_audio_dataset.py            # [done] (19 tests)
     test_audio_training.py           # [done] (10 tests)
     test_voice_database.py           # [done] (43 tests)
+    test_pipeline.py                 # [done] (38 tests)
+    test_cli.py                      # [done] (36 tests)
 ```
 
 ---
