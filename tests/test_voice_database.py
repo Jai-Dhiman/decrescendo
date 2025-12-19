@@ -8,20 +8,20 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
-from decrescendo.constitutional_audio.output_classifier import (
+from decrescendo.musicritic.output_classifier import (
     OutputClassifierConfig,
     VoiceDatabase,
     VoiceDuplicateError,
     VoiceEntry,
     VoiceNotFoundError,
 )
-from decrescendo.constitutional_audio.output_classifier.checkpointing import (
+from decrescendo.musicritic.output_classifier.checkpointing import (
     VoiceDatabaseNotFoundError,
 )
-from decrescendo.constitutional_audio.output_classifier.voice_database import (
+from decrescendo.musicritic.output_classifier.voice_database import (
     SimilarityResult,
 )
-from decrescendo.constitutional_audio.output_classifier.voice_enrollment import (
+from decrescendo.musicritic.output_classifier.voice_enrollment import (
     AudioQualityError,
     EnrollmentResult,
     QualityCheckResult,

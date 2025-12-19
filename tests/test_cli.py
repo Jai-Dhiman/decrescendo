@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from decrescendo.constitutional_audio.cli import (
+from decrescendo.musicritic.cli import (
     CLIError,
     CheckpointNotProvidedError,
     create_parser,
@@ -101,7 +101,7 @@ class TestArgumentParser:
         """Test parser can be created."""
         parser = create_parser()
         assert parser is not None
-        assert parser.prog == "constitutional-audio"
+        assert parser.prog == "musicritic"
 
     def test_classify_prompt_args(self):
         """Test classify-prompt argument parsing."""
@@ -223,7 +223,7 @@ class TestListVoicesCommand:
 
     def test_list_voices_missing_db_raises(self):
         """Test list-voices raises when voice-db not provided."""
-        from decrescendo.constitutional_audio.cli import cmd_list_voices
+        from decrescendo.musicritic.cli import cmd_list_voices
 
         args = MagicMock()
         args.voice_db = None
@@ -233,7 +233,7 @@ class TestListVoicesCommand:
 
     def test_list_voices_db_not_found_raises(self):
         """Test list-voices raises when database doesn't exist."""
-        from decrescendo.constitutional_audio.cli import cmd_list_voices
+        from decrescendo.musicritic.cli import cmd_list_voices
 
         args = MagicMock()
         args.voice_db = "/nonexistent/path"
@@ -243,8 +243,8 @@ class TestListVoicesCommand:
 
     def test_list_voices_json_output(self, capsys):
         """Test list-voices JSON output."""
-        from decrescendo.constitutional_audio.cli import cmd_list_voices
-        from decrescendo.constitutional_audio.output_classifier.voice_database import (
+        from decrescendo.musicritic.cli import cmd_list_voices
+        from decrescendo.musicritic.output_classifier.voice_database import (
             VoiceDatabase,
         )
 
@@ -276,7 +276,7 @@ class TestEnrollVoiceCommand:
 
     def test_enroll_voice_missing_checkpoint(self):
         """Test enroll-voice raises when checkpoint not provided."""
-        from decrescendo.constitutional_audio.cli import cmd_enroll_voice
+        from decrescendo.musicritic.cli import cmd_enroll_voice
 
         args = MagicMock()
         args.output_checkpoint = None
@@ -287,7 +287,7 @@ class TestEnrollVoiceCommand:
 
     def test_enroll_voice_missing_voice_db(self):
         """Test enroll-voice raises when voice-db not provided."""
-        from decrescendo.constitutional_audio.cli import cmd_enroll_voice
+        from decrescendo.musicritic.cli import cmd_enroll_voice
 
         args = MagicMock()
         args.output_checkpoint = "./checkpoint"
@@ -298,7 +298,7 @@ class TestEnrollVoiceCommand:
 
     def test_enroll_voice_file_not_found(self):
         """Test enroll-voice raises when audio file doesn't exist."""
-        from decrescendo.constitutional_audio.cli import cmd_enroll_voice
+        from decrescendo.musicritic.cli import cmd_enroll_voice
 
         args = MagicMock()
         args.output_checkpoint = "./checkpoint"
@@ -315,7 +315,7 @@ class TestClassifyPromptCommand:
 
     def test_classify_prompt_missing_checkpoint(self):
         """Test classify-prompt raises when checkpoint not provided."""
-        from decrescendo.constitutional_audio.cli import cmd_classify_prompt
+        from decrescendo.musicritic.cli import cmd_classify_prompt
 
         args = MagicMock()
         args.input_checkpoint = None
@@ -329,7 +329,7 @@ class TestClassifyAudioCommand:
 
     def test_classify_audio_missing_checkpoint(self):
         """Test classify-audio raises when checkpoint not provided."""
-        from decrescendo.constitutional_audio.cli import cmd_classify_audio
+        from decrescendo.musicritic.cli import cmd_classify_audio
 
         args = MagicMock()
         args.output_checkpoint = None
@@ -340,7 +340,7 @@ class TestClassifyAudioCommand:
 
     def test_classify_audio_file_not_found(self):
         """Test classify-audio raises when file doesn't exist."""
-        from decrescendo.constitutional_audio.cli import cmd_classify_audio
+        from decrescendo.musicritic.cli import cmd_classify_audio
 
         args = MagicMock()
         args.output_checkpoint = "./checkpoint"
@@ -355,7 +355,7 @@ class TestServeCommand:
 
     def test_serve_missing_fastapi(self):
         """Test serve raises when FastAPI not installed."""
-        from decrescendo.constitutional_audio.cli import cmd_serve
+        from decrescendo.musicritic.cli import cmd_serve
 
         args = MagicMock()
         args.host = "127.0.0.1"
@@ -409,8 +409,8 @@ class TestPromptResultFormatter:
 
     def test_format_prompt_result_text(self):
         """Test formatting prompt classification result."""
-        from decrescendo.constitutional_audio.cli import format_prompt_result_text
-        from decrescendo.constitutional_audio.pipeline import PipelineDecision
+        from decrescendo.musicritic.cli import format_prompt_result_text
+        from decrescendo.musicritic.pipeline import PipelineDecision
 
         # Create mock result
         input_result = MagicMock()
@@ -434,8 +434,8 @@ class TestPromptResultFormatter:
 
     def test_format_prompt_result_with_violations(self):
         """Test formatting with policy violations."""
-        from decrescendo.constitutional_audio.cli import format_prompt_result_text
-        from decrescendo.constitutional_audio.pipeline import PipelineDecision
+        from decrescendo.musicritic.cli import format_prompt_result_text
+        from decrescendo.musicritic.pipeline import PipelineDecision
 
         input_result = MagicMock()
         input_result.intent.name = "SUSPICIOUS"
@@ -468,8 +468,8 @@ class TestAudioResultFormatter:
 
     def test_format_audio_result_text(self):
         """Test formatting audio classification result."""
-        from decrescendo.constitutional_audio.cli import format_audio_result_text
-        from decrescendo.constitutional_audio.pipeline import PipelineDecision
+        from decrescendo.musicritic.cli import format_audio_result_text
+        from decrescendo.musicritic.pipeline import PipelineDecision
 
         output_result = MagicMock()
         output_result.harm_scores = {
@@ -491,8 +491,8 @@ class TestAudioResultFormatter:
 
     def test_format_audio_result_with_voice_match(self):
         """Test formatting with voice matches."""
-        from decrescendo.constitutional_audio.cli import format_audio_result_text
-        from decrescendo.constitutional_audio.pipeline import PipelineDecision
+        from decrescendo.musicritic.cli import format_audio_result_text
+        from decrescendo.musicritic.pipeline import PipelineDecision
 
         voice_match = MagicMock()
         voice_match.name = "Protected Artist"
@@ -519,7 +519,7 @@ class TestEnrollmentResultFormatter:
 
     def test_format_enrollment_success(self):
         """Test formatting successful enrollment."""
-        from decrescendo.constitutional_audio.cli import format_enrollment_result_text
+        from decrescendo.musicritic.cli import format_enrollment_result_text
 
         quality = MagicMock()
         quality.passed = True
@@ -545,7 +545,7 @@ class TestEnrollmentResultFormatter:
 
     def test_format_enrollment_failure(self):
         """Test formatting failed enrollment."""
-        from decrescendo.constitutional_audio.cli import format_enrollment_result_text
+        from decrescendo.musicritic.cli import format_enrollment_result_text
 
         duplicate = MagicMock()
         duplicate.name = "Existing Artist"

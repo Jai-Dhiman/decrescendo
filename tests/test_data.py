@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from decrescendo.constitutional_audio.data import (
+from decrescendo.musicritic.data import (
     DatasetLoadError,
     InputClassifierDataset,
     InputClassifierSample,

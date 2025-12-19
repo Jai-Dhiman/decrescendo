@@ -139,13 +139,13 @@ class InputClassifierInference:
     - Decision recommendation (ALLOW/FLAG_FOR_REVIEW/BLOCK)
 
     Example:
-        >>> from decrescendo.constitutional_audio.input_classifier import (
+        >>> from decrescendo.musicritic.input_classifier import (
         ...     InputClassifier, InputClassifierConfig
         ... )
-        >>> from decrescendo.constitutional_audio.input_classifier.pretrained import (
+        >>> from decrescendo.musicritic.input_classifier.pretrained import (
         ...     initialize_from_pretrained
         ... )
-        >>> from decrescendo.constitutional_audio.input_classifier.inference import (
+        >>> from decrescendo.musicritic.input_classifier.inference import (
         ...     InputClassifierInference
         ... )
         >>>

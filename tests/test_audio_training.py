@@ -5,10 +5,10 @@ import jax.numpy as jnp
 import optax
 import pytest
 
-from decrescendo.constitutional_audio.output_classifier.config import OutputClassifierConfig
-from decrescendo.constitutional_audio.output_classifier.model import OutputClassifierModel
-from decrescendo.constitutional_audio.training.audio_losses import AudioLossWeights
-from decrescendo.constitutional_audio.training.audio_trainer import (
+from decrescendo.musicritic.output_classifier.config import OutputClassifierConfig
+from decrescendo.musicritic.output_classifier.model import OutputClassifierModel
+from decrescendo.musicritic.training.audio_losses import AudioLossWeights
+from decrescendo.musicritic.training.audio_trainer import (
     AudioTrainState,
     AudioTrainingConfig,
     create_audio_eval_step,

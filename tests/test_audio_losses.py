@@ -4,7 +4,7 @@ import jax
 import jax.numpy as jnp
 import pytest
 
-from decrescendo.constitutional_audio.training.audio_losses import (
+from decrescendo.musicritic.training.audio_losses import (
     AudioLossOutput,
     AudioLossWeights,
     combined_audio_loss,

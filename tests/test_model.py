@@ -4,7 +4,7 @@ import jax
 import jax.numpy as jnp
 import pytest
 
-from decrescendo.constitutional_audio.input_classifier import (
+from decrescendo.musicritic.input_classifier import (
     InputClassifier,
     InputClassifierConfig,
 )

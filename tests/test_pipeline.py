@@ -14,7 +14,7 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
-from decrescendo.constitutional_audio.pipeline import (
+from decrescendo.musicritic.pipeline import (
     ClassifierNotEnabledError,
     ConstitutionalAudio,
     GenerationClassificationResult,
@@ -35,7 +35,7 @@ from decrescendo.constitutional_audio.pipeline import (
 @pytest.fixture
 def mock_input_classifier():
     """Create a mock input classifier."""
-    from decrescendo.constitutional_audio.input_classifier.inference import (
+    from decrescendo.musicritic.input_classifier.inference import (
         ArtistRequest,
         ClassificationResult,
         Decision,
@@ -106,7 +106,7 @@ def mock_input_classifier():
 @pytest.fixture
 def mock_output_classifier():
     """Create a mock output classifier."""
-    from decrescendo.constitutional_audio.output_classifier.inference import (
+    from decrescendo.musicritic.output_classifier.inference import (
         AggregatedResult,
         AudioClassificationResult,
         Decision,
@@ -144,7 +144,7 @@ def mock_output_classifier():
 @pytest.fixture
 def mock_voice_database():
     """Create a mock voice database."""
-    from decrescendo.constitutional_audio.output_classifier.checkpointing import VoiceEntry
+    from decrescendo.musicritic.output_classifier.checkpointing import VoiceEntry
 
     db = MagicMock()
     db.list_voices.return_value = [
@@ -648,7 +648,7 @@ class TestDecisionAggregation:
         mock_input_classifier,
     ):
         """Test that audio BLOCK results in overall BLOCK."""
-        from decrescendo.constitutional_audio.output_classifier.inference import (
+        from decrescendo.musicritic.output_classifier.inference import (
             AggregatedResult,
             Decision,
             SpeakerMatch,
@@ -686,7 +686,7 @@ class TestDecisionAggregation:
         mock_input_classifier,
     ):
         """Test FLAG_FOR_REVIEW with borderline content."""
-        from decrescendo.constitutional_audio.output_classifier.inference import (
+        from decrescendo.musicritic.output_classifier.inference import (
             AggregatedResult,
             Decision,
             SpeakerMatch,
@@ -723,7 +723,7 @@ class TestDecisionAggregation:
         mock_input_classifier,
     ):
         """Test that BLOCK takes precedence over FLAG_FOR_REVIEW."""
-        from decrescendo.constitutional_audio.output_classifier.inference import (
+        from decrescendo.musicritic.output_classifier.inference import (
             AggregatedResult,
             Decision,
             SpeakerMatch,
@@ -771,7 +771,7 @@ class TestProtectedVoiceMatching:
         mock_voice_database,
     ):
         """Test that voice database is properly integrated."""
-        from decrescendo.constitutional_audio.output_classifier.inference import (
+        from decrescendo.musicritic.output_classifier.inference import (
             AggregatedResult,
             Decision,
             SpeakerMatch,
@@ -863,7 +863,7 @@ class TestDecisionMapping:
 
     def test_output_decision_mapping(self, mock_output_classifier):
         """Test output classifier decision mapping."""
-        from decrescendo.constitutional_audio.output_classifier.inference import Decision
+        from decrescendo.musicritic.output_classifier.inference import Decision
 
         config = PipelineConfig(
             enable_input_classifier=False,
@@ -972,10 +972,10 @@ class TestRealModelIntegration:
     @pytest.fixture
     def real_output_classifier(self, rng):
         """Create a real output classifier with random weights."""
-        from decrescendo.constitutional_audio.output_classifier import (
+        from decrescendo.musicritic.output_classifier import (
             OutputClassifierConfig,
         )
-        from decrescendo.constitutional_audio.output_classifier.inference import (
+        from decrescendo.musicritic.output_classifier.inference import (
             OutputClassifierInference,
             initialize_output_classifier,
         )

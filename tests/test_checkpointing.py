@@ -9,11 +9,11 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
-from decrescendo.constitutional_audio.input_classifier import (
+from decrescendo.musicritic.input_classifier import (
     InputClassifier,
     InputClassifierConfig,
 )
-from decrescendo.constitutional_audio.input_classifier.checkpointing import (
+from decrescendo.musicritic.input_classifier.checkpointing import (
     CHECKPOINT_VERSION,
     CheckpointConfigError,
     CheckpointCorruptedError,
@@ -26,7 +26,7 @@ from decrescendo.constitutional_audio.input_classifier.checkpointing import (
     load_input_classifier,
     save_input_classifier,
 )
-from decrescendo.constitutional_audio.output_classifier.checkpointing import (
+from decrescendo.musicritic.output_classifier.checkpointing import (
     OutputClassifierCheckpointer,
     VoiceEntry,
     load_output_classifier,
@@ -34,11 +34,11 @@ from decrescendo.constitutional_audio.output_classifier.checkpointing import (
     save_output_classifier,
     save_voice_database,
 )
-from decrescendo.constitutional_audio.output_classifier.config import (
+from decrescendo.musicritic.output_classifier.config import (
     AudioEncoderConfig,
     OutputClassifierConfig,
 )
-from decrescendo.constitutional_audio.output_classifier.inference import (
+from decrescendo.musicritic.output_classifier.inference import (
     initialize_output_classifier,
 )
 
@@ -258,7 +258,7 @@ class TestOutputClassifierCheckpointing:
 
     def test_load_nonexistent_raises(self, temp_dir):
         """Test that loading nonexistent checkpoint raises error."""
-        from decrescendo.constitutional_audio.output_classifier.checkpointing import (
+        from decrescendo.musicritic.output_classifier.checkpointing import (
             CheckpointNotFoundError as OutputCheckpointNotFoundError,
         )
 
@@ -308,7 +308,7 @@ class TestVoiceDatabase:
 
     def test_voice_database_not_found(self, temp_dir):
         """Test error when voice database doesn't exist."""
-        from decrescendo.constitutional_audio.output_classifier.checkpointing import (
+        from decrescendo.musicritic.output_classifier.checkpointing import (
             VoiceDatabaseNotFoundError,
         )
 
@@ -351,7 +351,7 @@ class TestConfigSerialization:
 
     def test_output_config_roundtrip(self):
         """Test OutputClassifierConfig survives JSON roundtrip."""
-        from decrescendo.constitutional_audio.output_classifier.checkpointing import (
+        from decrescendo.musicritic.output_classifier.checkpointing import (
             _dataclass_to_dict as output_dataclass_to_dict,
             _reconstruct_output_classifier_config,
         )

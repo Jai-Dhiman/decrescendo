@@ -1,14 +1,14 @@
-"""Command-line interface for Constitutional Audio.
+"""Command-line interface for MusiCritic.
 
 Provides commands for classifying prompts and audio, enrolling protected voices,
 and running an HTTP API server.
 
 Usage:
-    constitutional-audio classify-prompt "Generate music like Drake"
-    constitutional-audio classify-audio output.wav --output-checkpoint ./checkpoints/output
-    constitutional-audio enroll-voice "Artist Name" sample1.wav sample2.wav --voice-db ./voices
-    constitutional-audio list-voices --voice-db ./voices
-    constitutional-audio serve --host 0.0.0.0 --port 8000
+    musicritic classify-prompt "Generate music like Drake"
+    musicritic classify-audio output.wav --output-checkpoint ./checkpoints/output
+    musicritic enroll-voice "Artist Name" sample1.wav sample2.wav --voice-db ./voices
+    musicritic list-voices --voice-db ./voices
+    musicritic serve --host 0.0.0.0 --port 8000
 """
 
 from __future__ import annotations
@@ -424,30 +424,30 @@ def cmd_serve(args: argparse.Namespace) -> int:
 def create_parser() -> argparse.ArgumentParser:
     """Create the argument parser."""
     parser = argparse.ArgumentParser(
-        prog="constitutional-audio",
-        description="Constitutional Audio - Safety classification for AI-generated audio",
+        prog="musicritic",
+        description="MusiCritic - Unified evaluation framework for AI-generated music",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   Classify a text prompt:
-    constitutional-audio classify-prompt "Generate music like Drake" \\
+    musicritic classify-prompt "Generate music like Drake" \\
       --input-checkpoint ./checkpoints/input
 
   Classify an audio file:
-    constitutional-audio classify-audio output.wav \\
+    musicritic classify-audio output.wav \\
       --output-checkpoint ./checkpoints/output \\
       --voice-db ./voices
 
   Enroll a protected voice:
-    constitutional-audio enroll-voice "Artist Name" sample1.wav sample2.wav \\
+    musicritic enroll-voice "Artist Name" sample1.wav sample2.wav \\
       --output-checkpoint ./checkpoints/output \\
       --voice-db ./voices
 
   List protected voices:
-    constitutional-audio list-voices --voice-db ./voices
+    musicritic list-voices --voice-db ./voices
 
   Start the HTTP API server:
-    constitutional-audio serve --host 0.0.0.0 --port 8000 \\
+    musicritic serve --host 0.0.0.0 --port 8000 \\
       --input-checkpoint ./checkpoints/input \\
       --output-checkpoint ./checkpoints/output
 """,

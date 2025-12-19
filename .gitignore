@@ -10,7 +10,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -62,6 +61,7 @@ multirun/
 
 # Claude
 .claude/
+CLAUDE.md
 
 # Local config
 .env

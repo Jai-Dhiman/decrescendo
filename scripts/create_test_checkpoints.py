@@ -15,13 +15,13 @@ import jax
 
 def create_input_classifier_checkpoint(output_dir: Path) -> None:
     """Create input classifier checkpoint with random weights."""
-    from decrescendo.constitutional_audio.input_classifier.config import (
+    from decrescendo.musicritic.input_classifier.config import (
         InputClassifierConfig,
     )
-    from decrescendo.constitutional_audio.input_classifier.pretrained import (
+    from decrescendo.musicritic.input_classifier.pretrained import (
         initialize_from_pretrained,
     )
-    from decrescendo.constitutional_audio.input_classifier.checkpointing import (
+    from decrescendo.musicritic.input_classifier.checkpointing import (
         save_input_classifier,
     )
 
@@ -40,13 +40,13 @@ def create_input_classifier_checkpoint(output_dir: Path) -> None:
 
 def create_output_classifier_checkpoint(output_dir: Path) -> None:
     """Create output classifier checkpoint with random weights."""
-    from decrescendo.constitutional_audio.output_classifier.config import (
+    from decrescendo.musicritic.output_classifier.config import (
         OutputClassifierConfig,
     )
-    from decrescendo.constitutional_audio.output_classifier.inference import (
+    from decrescendo.musicritic.output_classifier.inference import (
         initialize_output_classifier,
     )
-    from decrescendo.constitutional_audio.output_classifier.checkpointing import (
+    from decrescendo.musicritic.output_classifier.checkpointing import (
         save_output_classifier,
     )
 
@@ -65,7 +65,7 @@ def create_output_classifier_checkpoint(output_dir: Path) -> None:
 
 def create_voice_database(output_dir: Path) -> None:
     """Create an empty voice database."""
-    from decrescendo.constitutional_audio.output_classifier.voice_database import (
+    from decrescendo.musicritic.output_classifier.voice_database import (
         VoiceDatabase,
     )
 

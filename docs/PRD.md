@@ -1,39 +1,52 @@
 # Product Requirements Document
 
-## MusiCritic & Constitutional Audio
+## MusiCritic
 
-**Author:** Jai Dhiman  
-**Version:** 1.0  
+**Author:** Jai Dhiman
+**Version:** 2.0
 **Last Updated:** December 2024
 
 ---
 
 ## Executive Summary
 
-This PRD defines two interconnected open-source products that address critical gaps in the AI music ecosystem:
+**MusiCritic** is a comprehensive evaluation framework for **AI-generated music** that unifies quality assessment and safety evaluation into a single system. It measures what current metrics miss across two complementary dimensions:
 
-1. **MusiCritic** — An automated musicality evaluation framework that measures what current metrics miss: phrase coherence, tension-resolution, expressive timing, and stylistic authenticity.
+**Quality Dimensions:**
+- Prompt adherence, musical coherence, audio quality, and musicality
 
-2. **Constitutional Audio** — A safety framework implementing Constitutional AI principles for audio generation, addressing copyright, voice cloning, cultural harms, and content moderation.
+**Safety Dimensions:**
+- Copyright/originality, voice cloning detection, cultural sensitivity, and content safety
 
-Both projects share infrastructure and target the same user base: AI music researchers, generative audio companies, and music technology developers.
+**Targets:**
+- **>0.75 human correlation** (vs. FAD's 0.52) for quality metrics
+- **<2% attack success rate** for safety classifiers
+- **<2 second processing** per 30-second clip
+
+MusiCritic provides a single API call that returns both "Is this AI music good?" and "Is this AI music safe?" — enabling AI music companies to evaluate quality and ensure compliance in one integrated workflow.
 
 ---
 
 ## Problem Statement
 
-### MusiCritic: The Evaluation Gap
+### The Quality Gap
 
-Current music AI evaluation is broken. The industry standard metric (Fréchet Audio Distance) achieves only **0.52 correlation with human perception**. CLAP scores fare even worse at **~0.30 correlation**. These metrics measure acoustic similarity but completely miss musicality—the qualities that make music feel intentional, expressive, and alive.
+Current AI music evaluation is broken. The industry standard metric (Fréchet Audio Distance) achieves only **0.52 correlation with human perception**. CLAP scores fare even worse at **0.26-0.30 correlation**. These metrics measure acoustic similarity but completely miss what makes AI-generated music sound good—coherent structure, prompt adherence, and absence of artifacts.
+
+**Recent Progress (Still Insufficient):**
+
+- **Human-CLAP** (Takano et al., 2025): Fine-tuned CLAP improved correlation to 0.512
+- **MAD** (Mauve Audio Divergence): Achieves 0.62 correlation on MusicPrefs benchmark
+- **FAD-CLAP-MA**: Using music-trained CLAP embeddings shows best correlation
 
 **Consequences:**
 
-- Music AI labs (Google, Meta, Stability, Suno, Udio) cannot objectively compare models on dimensions that matter to musicians
+- Music AI labs (Google, Meta, Stability, Suno, Udio) cannot objectively compare models on dimensions that matter
 - Papers report metrics that don't correlate with actual quality
 - Progress is bottlenecked by lack of principled evaluation
-- No benchmark captures phrase coherence, harmonic sophistication, or expressive timing
+- No benchmark captures prompt adherence, structural coherence, or audio quality
 
-### Constitutional Audio: The Safety Gap
+### The Safety Gap
 
 Audio AI safety is fragmented and inadequate. The UMG lawsuits against Suno and Udio revealed that these platforms processed ~864,000 files daily using copyrighted recordings. ADL investigations found extensive hate content bypass on Suno using coded language. Voice cloning has already enabled election interference (Slovak election 2023) and $25M CEO fraud.
 
@@ -44,18 +57,31 @@ Audio AI safety is fragmented and inadequate. The UMG lawsuits against Suno and 
 - Cultural appropriation in music remains undefined computationally
 - Regulation is coming (EU AI Act, Tennessee ELVIS Act) but industry lacks compliance tools
 
+### The Integration Gap
+
+Currently, companies must use **separate tools** for quality evaluation and safety assessment, leading to:
+
+- Fragmented workflows with multiple API calls
+- Inconsistent scoring frameworks
+- Duplicate audio processing (wasted compute)
+- No unified view of "good and safe" AI music
+
+**Validation Standards:**
+- **Quality:** AIME dataset (6,500 AI-generated tracks, 15,600 pairwise human comparisons)
+- **Safety:** ASVspoof for voice cloning, custom adversarial benchmarks for content safety
+
 ---
 
 ## Target Users
 
 ### Primary Users
 
-| User Type | MusiCritic Use Case | Constitutional Audio Use Case |
-|-----------|---------------------|-------------------------------|
+| User Type | Quality Use Cases | Safety Use Cases |
+|-----------|-------------------|------------------|
 | **Music AI Researchers** | Benchmark model improvements, ablation studies, paper evaluation | Red-team models, measure safety metrics |
-| **Generative Audio Companies** | A/B test generation quality, optimize for musicality | Content moderation, copyright detection, regulatory compliance |
-| **Music Educators** | Automated performance feedback, practice tool evaluation | N/A |
-| **Audio Platform Trust & Safety** | N/A | Content screening, artist protection, policy enforcement |
+| **Generative Audio Companies** | A/B test generation quality, CI/CD quality gates, prompt adherence testing | Content moderation, copyright detection, regulatory compliance |
+| **AI Music Startups** | Compare against Suno/Udio baselines on standardized benchmarks | Pre-release safety screening |
+| **Audio Platform Trust & Safety** | Quality-based content ranking | Content screening, artist protection, policy enforcement |
 
 ### Secondary Users
 
@@ -63,72 +89,141 @@ Audio AI safety is fragmented and inadequate. The UMG lawsuits against Suno and 
 - Streaming platform recommendation teams
 - Music licensing and rights management companies
 - Regulatory bodies and standards organizations
+- Artists seeking voice protection
 
 ---
 
 ## Product Vision
 
-### MusiCritic Vision
+**"The comprehensive open-source framework for evaluating AI-generated music — measuring both quality and safety in a single, unified assessment."**
 
-**"The definitive open-source framework for evaluating AI-generated music on dimensions that actually matter to musicians."**
+MusiCritic will become the industry standard for AI music evaluation, analogous to how BLEU/ROUGE became standard for NLP or FID for image generation—but specifically designed for the unique challenges of AI-generated audio:
 
-MusiCritic will become the industry standard for music AI evaluation, analogous to how BLEU/ROUGE became standard for NLP or FID for image generation—but with strong correlation to human musical judgment.
+- **Quality:** Detecting artifacts, measuring prompt alignment, assessing structural coherence
+- **Safety:** Protecting artists, preventing misuse, ensuring regulatory compliance
 
-### Constitutional Audio Vision
-
-**"The first systematic framework for identifying and mitigating harms unique to audio AI generation."**
-
-Constitutional Audio will provide the safety infrastructure that enables responsible development of audio AI, protecting artists, preventing misuse, and establishing industry best practices before regulation mandates crude solutions.
+One API. One score framework. Complete evaluation.
 
 ---
 
-## MusiCritic: Product Definition
+## Product Definition
 
 ### Core Capabilities
 
-#### 1. Multi-Dimensional Musicality Scoring
+MusiCritic evaluates AI-generated audio across **8 dimensions** organized into Quality and Safety categories:
 
-Evaluate audio across 16+ dimensions organized in four tiers:
+#### Quality Dimensions (4)
 
-**Tier 1: Highly Objective (Directly Measurable)**
+Evaluate AI-generated audio quality with >0.75 target human correlation:
 
-- Pitch accuracy (Hz deviation from target)
-- Rhythmic precision (onset timing deviation)
-- Tempo stability (BPM variance over time)
-- Dynamic range (dB measurement)
-- Intonation quality (harmonic spectrum analysis)
+**Dimension 1: Prompt Adherence**
 
-**Tier 2: Moderately Objective (Feature Extraction Required)**
+Measures how well the generated audio matches the text prompt.
 
-- Phrasing coherence (phrase boundary detection + contour analysis)
-- Articulation clarity (attack/decay characteristics)
-- Rubato appropriateness (tempo deviation patterns)
-- Voicing balance (spectral energy distribution)
-- Pedaling effectiveness (sustain/resonance analysis)
+- CLAP cosine similarity using `laion/larger_clap_music` embeddings
+- Genre classification accuracy (CNN+LSTM, 95.4% accuracy)
+- Mood/instrumentation alignment scoring
+- Style transfer fidelity assessment
 
-**Tier 3: Semi-Subjective (Reference Model Required)**
+**Dimension 2: Musical Coherence**
 
-- Stylistic authenticity (corpus-based similarity)
-- Structural coherence (form adherence, motif development)
-- Emotional expression (arousal/valence trajectory)
-- Harmonic sophistication (chord vocabulary, voice leading)
-- Groove/swing feel (micro-timing patterns)
+Assesses structural and compositional quality.
 
-**Tier 4: Aggregate Scores**
+- Structure detection: verse/chorus/bridge identification (SpecTNT, 87% accuracy)
+- Harmonic quality: chord progression analysis (Essentia ChordsDetection)
+- Melodic coherence: phrase completion and contour analysis (CREPE/pYIN)
+- Rhythmic stability: beat tracking and tempo drift detection (madmom DBNBeatTracker, 95%+ accuracy)
+- Key consistency: tonal center stability (Krumhansl-Schmuckler profiles)
 
-- Overall musicality score (weighted combination)
-- Genre-specific subscores
-- Comparative ranking against reference corpus
+**Dimension 3: Audio Quality**
+
+Detects artifacts and production issues specific to AI generation.
+
+- AI artifact detection: spectral peak analysis for generative fingerprints (99%+ accuracy)
+- Click/transient artifacts: Essentia ClickDetector
+- Loudness compliance: LUFS measurement (-14 LUFS target for streaming)
+- Dynamic range: LRA (Loudness Range) analysis
+- True Peak: headroom compliance (<-1 dBTP)
+- Perceptual quality: ViSQOLAudio MOS scoring (1-5 scale)
+
+**Dimension 4: Musicality**
+
+Evaluates expressive and aesthetic qualities.
+
+- Tension-resolution: Tonal Interval Space (TIS) modeling
+  - Cloud diameter (harmonic clarity)
+  - Cloud momentum (rate of harmonic change)
+  - Tensile strain (deviation from tonal center)
+- Dynamic variation: loudness contour analysis
+- Genre authenticity: corpus-based similarity scoring
+- Groove/swing feel: micro-timing pattern analysis
+
+#### Safety Dimensions (4)
+
+Evaluate AI-generated audio safety with <2% attack success rate target:
+
+**Dimension 5: Copyright & Originality**
+
+Detects potential copying or excessive similarity to copyrighted/training data.
+
+- Audio fingerprinting: Chromaprint/AcoustID matching against copyright database
+- Melody similarity: MelodySim model (MERT encoder + Triplet NN)
+- Sample detection: identifying copyrighted samples in generated audio
+- Focus on melody + rhythm combination (harmony alone insufficient)
+- Distinguish "style matching" from "direct copying"
+
+**Dimension 6: Voice Cloning Detection**
+
+Identifies unauthorized use of protected voices.
+
+- Known voice detection: politician, celebrity, protected individual matching
+- Speaker verification: ECAPA-TDNN embeddings against registered voice database
+- Deepfake confidence scoring
+- Consent verification integration
+
+**Dimension 7: Cultural Sensitivity**
+
+Flags potentially culturally harmful content for review.
+
+- Sacred/ceremonial music detection
+- Cultural context flagging (requires human review)
+- Stereotyping pattern detection
+- Note: Flagging only, not adjudication
+
+**Dimension 8: Content Safety**
+
+Detects harmful content in audio.
+
+- Hate speech/slur detection (via ASR + NLP pipeline)
+- Harmful instruction detection
+- Physical safety: harmful frequencies, volume spikes, epileptogenic patterns
+- Age-inappropriate content flagging
+
+#### Aggregate Scores
+
+**Quality Score (0-100):**
+- Weighted combination of Dimensions 1-4
+- Genre-specific subscores (10+ genre families)
+- AIME benchmark compatibility
+
+**Safety Score (ALLOW / FLAG / BLOCK):**
+- Aggregation of Dimensions 5-8
+- Configurable thresholds per dimension
+- Evidence provided for flagged content
+
+**Overall Decision:**
+- Combined quality + safety assessment
+- Single API response with both evaluations
 
 #### 2. Hierarchical Temporal Analysis
 
-Analyze music at multiple time scales:
+Analyze AI-generated music at multiple time scales:
 
-- **Frame level** (10ms): Note onsets, spectral features
-- **Beat level** (500ms): Rhythmic patterns, micro-timing
-- **Phrase level** (4-16 bars): Melodic contour, harmonic progression
-- **Section level** (verse/chorus): Structural coherence
-- **Piece level**: Overall narrative arc, tension-resolution
+- **Frame level** (10ms): MERT-v1-95M chunk processing (6 chunks x 100ms per 5s)
+- **Beat level** (500ms): madmom DBNBeatTracker (95%+ accuracy), micro-timing patterns
+- **Phrase level** (4-16 bars): Melodic contour analysis, harmonic progression tracking
+- **Section level** (verse/chorus): SpecTNT structure detection, self-similarity matrices
+- **Piece level**: Overall tension-resolution arc, structural completeness assessment
 
 #### 3. Tension-Resolution Modeling
 
@@ -141,26 +236,32 @@ Compute harmonic and rhythmic tension curves using Tonal Interval Space (TIS):
 
 #### 4. Comparative Evaluation
 
-- Pairwise ranking: "Which performance is more musical?"
-- Reference-based scoring: "How does this compare to professional recordings?"
-- Style transfer evaluation: "Does this sound like the target artist/genre?"
+- Pairwise ranking: "Which AI generation is higher quality?" (AIME protocol compatible)
+- Model comparison: "How does Model A compare to Model B on this prompt?"
+- Prompt adherence ranking: "Which generation better matches the text prompt?"
+- Style transfer evaluation: "Does this sound like the target genre?"
 
 ### Output Formats
 
 **API Response:**
 
-- JSON with dimension scores, confidence intervals, and explanations
+- JSON with 5-dimension scores, confidence intervals, and explanations
+- CLAP similarity scores for prompt adherence
+- AI artifact confidence scores and locations
+- Structure detection timestamps (verse/chorus/bridge boundaries)
+- Originality/plagiarism scores with matched fingerprints
 - Embedding vectors for downstream tasks
 - Temporal analysis (scores over time)
 
 **Human-Readable Report:**
 
-- Overall assessment with natural language explanation
+- Overall quality assessment with natural language explanation
 - Dimension breakdown with visualizations
-- Specific feedback for improvement (educational use case)
+- Specific issues identified (artifacts, structure problems, low prompt adherence)
 
 **Benchmark Integration:**
 
+- AIME-compatible pairwise comparison results
 - Leaderboard-compatible metrics
 - Reproducible evaluation protocol
 - Statistical significance testing
@@ -169,94 +270,40 @@ Compute harmonic and rhythmic tension curves using Tonal Interval Space (TIS):
 
 | Metric | Current State | Target |
 |--------|---------------|--------|
-| Human correlation (Spearman) | 0.52 (FAD) | >0.75 |
-| Inter-annotator agreement | N/A | >0.80 Krippendorff's α |
-| Dimension coverage | 3-4 metrics | 16+ dimensions |
+| Human correlation (Spearman) | 0.52 (FAD), 0.62 (MAD) | >0.75 |
+| AIME benchmark ranking | N/A | Top-3 on pairwise accuracy |
+| FAD-CLAP-MA comparison | Baseline | Significant improvement |
+| Dimension coverage | 1 (FAD) | 5 core dimensions |
 | Processing speed | Varies | <2s per 30s audio |
 | Genre coverage | Western-centric | 10+ genre families |
 
 ### Non-Goals (V1)
 
+- Human performance evaluation (live musicians, practice feedback, music education)
 - Real-time evaluation during live performance
 - Symbolic (MIDI-only) evaluation without audio
-- Composition evaluation (lyrics, arrangement choices)
+- Lyrics/vocal content analysis (use existing ASR + NLP)
 - Subjective "star quality" or commercial viability prediction
 
----
+### Validation Datasets
 
-## Constitutional Audio: Product Definition
+MusiCritic will be validated against established human preference datasets:
 
-### Core Capabilities
+| Dataset | Size | Use | License |
+|---------|------|-----|---------|
+| **AIME** | 6,500 tracks, 15,600 pairwise comparisons | Primary validation benchmark | CC-BY-4.0 |
+| **MusicPrefs** | 7 models, pairwise preferences | Secondary validation | Open-source |
+| **MusicCaps** | 5,521 clips with expert captions | Text-audio alignment validation | CC-BY-SA 4.0 |
+| **MARBLE** | 18 tasks, 12 datasets | Music understanding benchmarking | Various |
 
-#### 1. Harm Classification
+### Additional Capabilities
 
-Multi-label classification across seven harm categories:
-
-**Copyright & IP (Critical)**
-
-- Artist voice detection (is this trying to sound like a specific artist?)
-- Melody similarity scoring (does this copy an existing melody?)
-- Sample detection (does this contain copyrighted samples?)
-- Style mimicry assessment (problematic imitation vs. legitimate influence)
-
-**Voice Cloning (Critical)**
-
-- Known voice detection (politician, celebrity, protected individual)
-- Consent verification integration (does this voice have usage rights?)
-- Deepfake confidence scoring
-
-**Cultural Harms (High)**
-
-- Sacred/ceremonial music detection
-- Cultural context flagging (requires human review)
-- Stereotyping pattern detection
-
-**Misinformation (Critical)**
-
-- Synthetic speech detection
-- Manipulation artifact analysis
-- Provenance verification (watermark detection)
-
-**Emotional Manipulation (Medium)**
-
-- Subliminal pattern detection
-- Addiction design pattern flagging
-- Extreme emotional content warning
-
-**Content Safety (High)**
-
-- Hate speech/slur detection in lyrics
-- Harmful instruction detection
-- Age-inappropriate content flagging
-
-**Physical Safety (High)**
-
-- Harmful frequency detection
-- Volume spike detection
-- Epileptogenic pattern detection
-
-#### 2. Constitutional Classifier Pipeline
-
-Two-stage classification following Anthropic's Constitutional Classifiers architecture:
-
-**Input Classifier (Pre-Generation)**
-
-- Prompt analysis for harmful intent
-- Artist/voice request detection
-- Policy violation prediction
-
-**Output Classifier (Streaming)**
-
-- Real-time content analysis during generation
-- Cumulative harm probability scoring
-- Intervention triggers at configurable thresholds
-
-#### 3. Artist Protection System
+#### Artist Protection System
 
 **Voice Fingerprint Registry**
 
-- Artists register voice embeddings
-- Similarity threshold configuration
+- Artists register voice embeddings via API
+- Configurable similarity thresholds
 - Automated takedown workflow integration
 
 **Style Protection**
@@ -265,11 +312,19 @@ Two-stage classification following Anthropic's Constitutional Classifiers archit
 - Quantify stylistic similarity vs. direct copying
 - Evidence generation for rights claims
 
-#### 4. Red-Teaming Infrastructure
+#### Input Classifier (Optional Pre-Generation)
+
+For streaming/real-time use cases:
+
+- Prompt analysis for harmful intent before generation
+- Artist/voice request detection
+- Policy violation prediction
+
+#### Red-Teaming Infrastructure
 
 **Automated Adversarial Testing**
 
-- Jailbreak prompt generation
+- Jailbreak prompt generation for safety classifiers
 - Evasion technique detection
 - Classifier robustness measurement
 
@@ -279,52 +334,13 @@ Two-stage classification following Anthropic's Constitutional Classifiers archit
 - False positive/negative tracking
 - Model drift detection
 
-### Output Formats
-
-**API Response:**
-
-- Harm category scores with confidence
-- Specific policy violations detected
-- Recommended actions (block, flag, allow)
-- Evidence for human review
-
-**Moderation Dashboard:**
-
-- Queue management for flagged content
-- Appeal workflow support
-- Audit logging
-
-**Compliance Reporting:**
-
-- EU AI Act transparency reports
-- Training data summaries
-- Watermark verification logs
-
-### Success Metrics
-
-| Metric | Current State | Target |
-|--------|---------------|--------|
-| Attack success rate | ~16% (baseline) | <2% |
-| Over-refusal rate | N/A | <0.5% increase |
-| Artist mimicry detection | Unknown | >95% precision @ 90% recall |
-| Voice clone detection | ~85% | >98% accuracy |
-| Processing latency | N/A | <100ms (streaming) |
-| False positive rate | N/A | <1% |
-
-### Non-Goals (V1)
-
-- Legal determination of copyright infringement (requires human/legal judgment)
-- Cultural appropriation adjudication (flagging only, not ruling)
-- Content generation (detection and classification only)
-- Speech-to-text transcription for lyric analysis (use existing ASR)
-
 ---
 
-## Shared Requirements
+## Requirements
 
 ### Open Source Commitment
 
-Both projects will be released under permissive open-source licenses:
+MusiCritic will be released under permissive open-source licenses:
 
 - **Code:** Apache 2.0
 - **Models:** Model weights with appropriate license (considering MERT's CC-BY-NC-4.0)
@@ -354,13 +370,14 @@ Both projects will be released under permissive open-source licenses:
 
 ### Performance Requirements
 
-| Requirement | MusiCritic | Constitutional Audio |
-|-------------|------------|---------------------|
-| Latency (30s audio) | <2 seconds | <500ms |
-| Throughput | 100 req/min | 1000 req/min |
-| Max audio length | 10 minutes | 5 minutes |
-| Supported formats | WAV, MP3, FLAC, OGG | WAV, MP3, FLAC, OGG |
-| Sample rates | 16kHz-48kHz | 16kHz-48kHz |
+| Requirement | Target |
+|-------------|--------|
+| Latency (30s audio) | <2 seconds (full evaluation) |
+| Latency (streaming) | <500ms (safety-only mode) |
+| Throughput | 100 req/min (GPU), 1000 req/min (safety-only) |
+| Max audio length | 10 minutes |
+| Supported formats | WAV, MP3, FLAC, OGG |
+| Sample rates | 16kHz-48kHz |
 
 ### Quality Requirements
 
@@ -373,57 +390,62 @@ Both projects will be released under permissive open-source licenses:
 
 ## Competitive Positioning
 
-### MusiCritic Differentiation
+### Quality Metrics Comparison
 
-| Capability | FAD | CLAP | Stability Metrics | MusiCritic |
-|------------|-----|------|-------------------|------------|
-| Human correlation | 0.52 | 0.30 | ~0.5 | >0.75 (target) |
-| Musicality dimensions | 1 | 1 | 3-4 | 16+ |
-| Hierarchical analysis | ❌ | ❌ | ❌ | ✅ |
-| Tension modeling | ❌ | ❌ | ❌ | ✅ |
-| Explainable scores | ❌ | ❌ | Partial | ✅ |
-| Open source | ✅ | ✅ | ✅ | ✅ |
+| Capability | FAD | CLAP | MAD | Human-CLAP | MusiCritic |
+|------------|-----|------|-----|------------|------------|
+| Human correlation | 0.52 | 0.26-0.30 | 0.62 | 0.512 | >0.75 (target) |
+| Evaluation dimensions | 1 | 1 | 1 | 1 | 8 (4 quality + 4 safety) |
+| Prompt adherence | ❌ | Partial | ❌ | ❌ | ✅ |
+| Structure detection | ❌ | ❌ | ❌ | ❌ | ✅ |
+| AI artifact detection | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Copyright/originality | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Voice cloning detection | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Content safety | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Explainable scores | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Open source | ✅ | ✅ | ✅ | ❌ | ✅ |
 
-### Constitutional Audio Differentiation
+### Safety Platform Comparison
 
-| Capability | Suno | Udio | Stability | Google | Constitutional Audio |
-|------------|------|------|-----------|--------|---------------------|
+| Capability | Suno | Udio | Stability | Google | MusiCritic |
+|------------|------|------|-----------|--------|------------|
+| Quality evaluation | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Copyright detection | ❌ | ⚠️ | ✅ | Unknown | ✅ |
 | Voice cloning protection | ❌ | ❌ | ✅ | ✅ | ✅ |
-| Cultural harm detection | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Coded language detection | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Cultural sensitivity | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Content safety | ⚠️ | ⚠️ | ✅ | ✅ | ✅ |
 | Open source | ❌ | ❌ | Partial | ❌ | ✅ |
-| Watermarking | ❌ | ⚠️ | ✅ | ✅ | ✅ |
+| Unified quality+safety | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 ---
 
 ## Release Strategy
 
-### Phase 1: Foundation (Months 1-2)
+### Phase 1: Foundation
 
-- Core evaluation pipeline (MusiCritic)
-- Basic safety classifiers (Constitutional Audio)
+- Core quality evaluation pipeline (Dimensions 1-4)
+- Basic safety classifiers (Dimensions 5-8)
 - Hugging Face model release
 - Technical blog post + paper preprint
 
-### Phase 2: Expansion (Months 3-4)
+### Phase 2: Expansion
 
-- Multi-dimensional scoring (MusiCritic)
-- Constitutional Classifier pipeline (Constitutional Audio)
+- Full 8-dimension scoring with confidence intervals
+- Artist voice protection system
 - Python SDK release
 - Community feedback integration
 
-### Phase 3: Production (Months 5-6)
+### Phase 3: Production
 
-- Full 16-dimension evaluation (MusiCritic)
-- Artist protection system (Constitutional Audio)
+- Input classifier for pre-generation screening
 - Hosted inference API
 - Industry partnership outreach
+- Compliance reporting features
 
-### Phase 4: Ecosystem (Months 7+)
+### Phase 4: Ecosystem
 
 - Leaderboard and benchmark establishment
-- Integration with major generation frameworks
+- Integration with major generation frameworks (Suno API, Udio API, etc.)
 - Continuous model improvement
 - Community contribution program
 
@@ -431,42 +453,50 @@ Both projects will be released under permissive open-source licenses:
 
 ## Success Criteria
 
-### MusiCritic Success
+### Quality Metrics
 
-1. **Adoption:** 1,000+ monthly active users within 6 months
+1. **Accuracy:** Achieve >0.75 human correlation validated by independent study
 2. **Citation:** Referenced in 10+ music AI papers within 12 months
-3. **Accuracy:** Achieve >0.75 human correlation validated by independent study
-4. **Industry:** Adopted by at least 2 major music AI companies for internal evaluation
+3. **Industry:** Adopted by at least 2 major music AI companies for internal evaluation
 
-### Constitutional Audio Success
+### Safety Metrics
 
 1. **Effectiveness:** Reduce attack success rate to <2% on standard adversarial benchmark
-2. **Adoption:** Integrated by 3+ audio platforms within 12 months
+2. **Voice Protection:** >98% accuracy on voice clone detection
+3. **Protection:** 100+ artists registered in voice protection system
+
+### Overall Adoption
+
+1. **Users:** 1,000+ monthly active users within 6 months
+2. **Platforms:** Integrated by 3+ audio platforms within 12 months
 3. **Recognition:** Cited in regulatory guidance or industry standards documents
-4. **Protection:** 100+ artists registered in voice protection system
 
 ---
 
 ## Appendix: User Stories
 
-### MusiCritic User Stories
+### Quality Evaluation Use Cases
 
-**As a music AI researcher**, I want to evaluate my model's outputs on musicality dimensions so that I can demonstrate improvements over baselines in my paper.
+**As a music AI researcher**, I want to evaluate my model's outputs on multiple dimensions (prompt adherence, coherence, quality, originality) so that I can demonstrate improvements over baselines in my paper.
 
-**As a generative music company**, I want to A/B test different model versions so that I can ship the one that produces more musical outputs.
+**As a generative music company**, I want to A/B test different model versions with automated quality gates so that I can ship the one that produces higher-quality outputs.
 
-**As a music educator**, I want to provide automated feedback on student performances so that they can practice more effectively between lessons.
+**As an AI music startup**, I want to compare my model against Suno/Udio baselines on the AIME benchmark so that I can demonstrate competitive performance to investors.
 
-**As a benchmark maintainer**, I want standardized evaluation metrics so that the community can fairly compare different approaches.
+**As a benchmark maintainer**, I want AIME-compatible evaluation protocols so that the community can fairly compare different AI music generation approaches.
 
-### Constitutional Audio User Stories
+### Safety Evaluation Use Cases
 
-**As a platform trust & safety lead**, I want to detect copyrighted content before publication so that we avoid legal liability.
+**As a platform trust & safety lead**, I want to detect copyrighted content and voice cloning before publication so that we avoid legal liability.
 
 **As an artist**, I want to register my voice so that unauthorized clones can be detected and removed.
 
-**As a compliance officer**, I want to generate transparency reports so that we meet EU AI Act requirements.
+**As a compliance officer**, I want unified quality and safety reports so that we meet EU AI Act requirements efficiently.
 
-**As a red team researcher**, I want to test model robustness so that we can improve safety before deployment.
+**As a red team researcher**, I want to test model robustness against adversarial attacks so that we can improve safety before deployment.
 
 **As a content moderator**, I want flagged content with evidence so that I can make informed decisions efficiently.
+
+### Unified Use Cases
+
+**As a generative music company**, I want a single API call that tells me both "is this music good?" and "is this music safe?" so that I can streamline my evaluation pipeline.

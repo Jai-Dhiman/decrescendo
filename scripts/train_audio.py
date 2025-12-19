@@ -88,21 +88,21 @@ def main() -> None:
     rng, init_rng, dropout_rng = jax.random.split(rng, 3)
 
     # Import here for faster --help
-    from decrescendo.constitutional_audio.output_classifier.config import (
+    from decrescendo.musicritic.output_classifier.config import (
         OutputClassifierConfig,
     )
-    from decrescendo.constitutional_audio.output_classifier.inference import (
+    from decrescendo.musicritic.output_classifier.inference import (
         initialize_output_classifier,
     )
-    from decrescendo.constitutional_audio.data.audio_dataset import (
+    from decrescendo.musicritic.data.audio_dataset import (
         AudioClassifierDataset,
         AudioDataLoader,
     )
-    from decrescendo.constitutional_audio.training.audio_trainer import (
+    from decrescendo.musicritic.training.audio_trainer import (
         AudioTrainer,
         AudioTrainingConfig,
     )
-    from decrescendo.constitutional_audio.training.audio_losses import (
+    from decrescendo.musicritic.training.audio_losses import (
         AudioLossWeights,
     )
 

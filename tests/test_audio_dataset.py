@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-from decrescendo.constitutional_audio.data.audio_dataset import (
+from decrescendo.musicritic.data.audio_dataset import (
     AudioAugmenter,
     AudioClassificationSample,
     AudioDataLoader,
@@ -18,7 +18,7 @@ from decrescendo.constitutional_audio.data.audio_dataset import (
     AugmentationConfig,
     create_dummy_audio_dataset,
 )
-from decrescendo.constitutional_audio.output_classifier.config import PreprocessingConfig
+from decrescendo.musicritic.output_classifier.config import PreprocessingConfig
 
 
 class TestAudioClassificationSample:

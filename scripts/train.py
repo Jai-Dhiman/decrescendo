@@ -7,22 +7,22 @@ import hydra
 import jax
 from omegaconf import DictConfig
 
-from decrescendo.constitutional_audio.data.dataset import (
+from decrescendo.musicritic.data.dataset import (
     DataLoader,
     InputClassifierDataset,
     create_dummy_dataset,
 )
-from decrescendo.constitutional_audio.input_classifier.config import (
+from decrescendo.musicritic.input_classifier.config import (
     ClassificationConfig,
     InputClassifierConfig,
     TransformerConfig,
 )
-from decrescendo.constitutional_audio.input_classifier.pretrained import (
+from decrescendo.musicritic.input_classifier.pretrained import (
     initialize_from_pretrained,
 )
-from decrescendo.constitutional_audio.training.losses import LossWeights
-from decrescendo.constitutional_audio.training.train_state import TrainState
-from decrescendo.constitutional_audio.training.trainer import (
+from decrescendo.musicritic.training.losses import LossWeights
+from decrescendo.musicritic.training.train_state import TrainState
+from decrescendo.musicritic.training.trainer import (
     Trainer,
     TrainingConfig,
     create_optimizer,

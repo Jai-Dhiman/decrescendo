@@ -1,7 +1,7 @@
 [project]
 name = "decrescendo"
 version = "0.1.0"
-description = "Constitutional Audio and MusiCritic - AI safety and evaluation for audio"
+description = "MusiCritic - Unified evaluation framework for AI-generated music"
 requires-python = ">=3.11"
 license = {text = "Apache-2.0"}
 authors = [
@@ -63,8 +63,23 @@ serve = [
     "python-multipart>=0.0.6",
 ]
 
+# Quality dimension dependencies (minimal - for CLAP/prompt adherence)
+clap = [
+    "laion-clap>=1.1.4",
+]
+
+# Audio fingerprinting
+fingerprint = [
+    "pyacoustid>=1.3.0",
+]
+
+# Note: madmom and essentia require special installation:
+#   pip install Cython numpy  # Build dependencies
+#   pip install madmom essentia
+# These are optional - install manually if needed for full quality evaluation
+
 [project.scripts]
-constitutional-audio = "decrescendo.constitutional_audio.cli:main"
+musicritic = "decrescendo.musicritic.cli:main"
 
 [build-system]
 requires = ["hatchling"]

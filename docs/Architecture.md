@@ -1,38 +1,52 @@
 # System Architecture Document
 
-## MusiCritic & Constitutional Audio
+## MusiCritic
 
-**Author:** Jai Dhiman  
-**Version:** 1.0  
+**Author:** Jai Dhiman
+**Version:** 2.0
 **Last Updated:** December 2024
 
 ---
 
 ## Architecture Overview
 
-Both MusiCritic and Constitutional Audio share a common foundation: audio embedding extraction, vector storage, and inference serving. They diverge at the task-specific layers—MusiCritic focuses on multi-dimensional quality prediction while Constitutional Audio focuses on harm classification and content moderation.
+MusiCritic is a unified evaluation framework for AI-generated music that combines **quality assessment** and **safety evaluation** in a single pipeline. It evaluates audio across 8 dimensions (4 quality + 4 safety) using shared infrastructure for efficient processing.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              SHARED INFRASTRUCTURE                          │
+│                           MUSICRITIC UNIFIED PIPELINE                       │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  Audio Input → Preprocessing → Embedding Extraction → Vector Storage        │
-│                     │                   │                                    │
-│              (Resampling,         (MERT, CLAP,                              │
-│               Chunking)           WavLM, EnCodec)                           │
+│                                                                             │
+│  Audio Input + Text Prompt                                                  │
+│         │                                                                   │
+│         ▼                                                                   │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                    PREPROCESSING & EMBEDDING                         │   │
+│  │  (Resampling, Chunking, MERT-v1-95M, CLAP, WavLM, madmom, Essentia) │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│         │                                                                   │
+│         ├─────────────────────────────────────────────┐                    │
+│         ▼                                             ▼                    │
+│  ┌─────────────────────────────┐       ┌─────────────────────────────────┐ │
+│  │    QUALITY DIMENSIONS (4)   │       │     SAFETY DIMENSIONS (4)       │ │
+│  ├─────────────────────────────┤       ├─────────────────────────────────┤ │
+│  │ 1. Prompt Adherence (CLAP)  │       │ 5. Copyright & Originality      │ │
+│  │ 2. Musical Coherence        │       │ 6. Voice Cloning Detection      │ │
+│  │ 3. Audio Quality            │       │ 7. Cultural Sensitivity         │ │
+│  │ 4. Musicality (TIS)         │       │ 8. Content Safety               │ │
+│  └─────────────────────────────┘       └─────────────────────────────────┘ │
+│         │                                             │                    │
+│         └─────────────────────────────────────────────┘                    │
+│                                 │                                          │
+│                                 ▼                                          │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                      UNIFIED SCORING MODULE                          │   │
+│  │  Quality Score (0-100) + Safety Decision (ALLOW/FLAG/BLOCK)         │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                 │                                          │
 └─────────────────────────────────────────────────────────────────────────────┘
-                    │                                    │
-                    ▼                                    ▼
-┌─────────────────────────────────┐    ┌─────────────────────────────────────┐
-│         MUSICRITIC              │    │       CONSTITUTIONAL AUDIO          │
-├─────────────────────────────────┤    ├─────────────────────────────────────┤
-│ • Musicality Prediction Heads   │    │ • Input Classifier                  │
-│ • Temporal Aggregation          │    │ • Output Classifier (Streaming)     │
-│ • Tension-Resolution Module     │    │ • Artist Fingerprint Matching       │
-│ • Comparative Ranking           │    │ • Harm Category Classification      │
-└─────────────────────────────────┘    └─────────────────────────────────────┘
-                    │                                    │
-                    ▼                                    ▼
+                                  │
+                                  ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                              SERVING LAYER                                  │
 ├─────────────────────────────────────────────────────────────────────────────┤
@@ -48,27 +62,38 @@ Both MusiCritic and Constitutional Audio share a common foundation: audio embedd
 
 | Component | Technology | Purpose | License |
 |-----------|------------|---------|---------|
-| **Primary Audio Encoder** | MERT-v1-330M | Music understanding embeddings | CC-BY-NC-4.0 |
-| **Text-Audio Alignment** | LAION-CLAP | Evaluation metrics, zero-shot | Apache 2.0 |
-| **Speaker Analysis** | WavLM-Large | Voice/speaker embeddings | MIT |
-| **Audio Tokenization** | EnCodec 24kHz | Discrete audio representation | MIT |
+| **Primary Audio Encoder** | MERT-v1-95M | Music understanding embeddings (smaller for latency) | CC-BY-NC-4.0 |
+| **Text-Audio Alignment** | CLAP (laion/larger_clap_music) | Prompt adherence scoring | Apache 2.0 |
+| **Beat/Tempo Analysis** | madmom | Beat tracking (95%+ accuracy), tempo detection | BSD-3-Clause |
+| **Chord/Key Detection** | Essentia | ChordsDetection, Key estimation, ClickDetector | AGPL-3.0 |
+| **Melody Analysis** | CREPE / pYIN | Pitch tracking, melody extraction | MIT / GPL |
+| **FAD Calculation** | fadtk | Frechet Audio Distance computation | MIT |
+| **Speaker Analysis** | WavLM-Large | Voice/speaker embeddings (voice cloning detection) | MIT |
 | **Speaker Verification** | ECAPA-TDNN | Voice fingerprinting | Apache 2.0 |
-| **Audio Fingerprinting** | Chromaprint | Content identification | LGPL 2.1 |
+| **Audio Fingerprinting** | Chromaprint | Content identification, originality checking | LGPL 2.1 |
 | **Vector Database** | FAISS / Qdrant | Embedding storage & search | MIT / Apache 2.0 |
-| **ML Framework** | PyTorch 2.x | Model training & inference | BSD |
+| **ML Framework** | JAX/Flax | Model training & inference | Apache 2.0 |
 | **Experiment Tracking** | Weights & Biases | Training monitoring | Commercial |
 | **Serving** | Modal / FastAPI | API deployment | Various |
+
+**License Restrictions (Important):**
+- **MERT-v1-95M**: CC-BY-NC-4.0 - Non-commercial use only
+- **Essentia**: AGPL-3.0 - Copyleft, source code disclosure required for derivative works
+- All other core dependencies are Apache 2.0 / MIT / BSD compatible
 
 ### Development Environment
 
 | Tool | Purpose |
 |------|---------|
-| Python 3.10+ | Primary language |
-| JAX/Flax | Alternative training (DPO) |
+| Python 3.11+ | Primary language |
+| JAX/Flax | Primary ML framework (consistent with Constitutional Audio) |
+| torchaudio | Audio I/O, resampling (PyTorch-based libraries via interop) |
 | Docker | Containerization |
 | pytest | Testing |
 | ruff | Linting |
 | pre-commit | Code quality |
+
+**Note:** Some libraries (madmom, Essentia, CREPE) are PyTorch/NumPy-based. JAX interoperability is handled via NumPy arrays at boundaries.
 
 ---
 
@@ -114,7 +139,7 @@ Preprocessed Chunks [N × 120000 samples @ 24kHz]
 
 ### Embedding Extraction Layer
 
-Multiple encoders run in parallel to extract complementary representations:
+Multiple encoders and analyzers run to extract complementary representations for AI music evaluation:
 
 ```
 Preprocessed Chunks
@@ -122,15 +147,15 @@ Preprocessed Chunks
      ├──────────────────┬──────────────────┬──────────────────┐
      ▼                  ▼                  ▼                  ▼
 ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-│   MERT      │  │   CLAP      │  │   WavLM     │  │  EnCodec    │
-│   330M      │  │   HTSAT     │  │   Large     │  │   24kHz     │
+│   MERT      │  │   CLAP      │  │   madmom    │  │  Essentia   │
+│   v1-95M    │  │ laion-music │  │             │  │             │
 ├─────────────┤  ├─────────────┤  ├─────────────┤  ├─────────────┤
-│ 24 layers   │  │ Audio enc.  │  │ 24 layers   │  │ 4 codebooks │
-│ 1024-dim    │  │ 1024-dim    │  │ 1024-dim    │  │ 50 Hz       │
-│ 75 Hz       │  │ Pooled      │  │ 50 Hz       │  │             │
+│ 95M params  │  │ Audio enc.  │  │ Beat track  │  │ Chords/Key  │
+│ 1024-dim    │  │ 1024-dim    │  │ 95%+ acc    │  │ Click det.  │
+│ 75 Hz       │  │ Pooled      │  │             │  │ HPCP        │
 │             │  │             │  │             │  │             │
-│ Music       │  │ Text-Audio  │  │ Speaker     │  │ Discrete    │
-│ Features    │  │ Alignment   │  │ Features    │  │ Tokens      │
+│ Music       │  │ Prompt      │  │ Rhythm      │  │ Harmonic    │
+│ Features    │  │ Adherence   │  │ Features    │  │ Features    │
 └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘
      │                  │                  │                  │
      └──────────────────┴──────────────────┴──────────────────┘
@@ -140,14 +165,20 @@ Preprocessed Chunks
                     [N × T × D] per encoder
 ```
 
+**Additional Encoders (Safety Dimensions):**
+- WavLM-Large: Speaker/voice embeddings for voice cloning detection
+- ECAPA-TDNN: Voice fingerprinting for artist protection
+
 **Encoder Selection by Task:**
 
-| Task | Primary Encoder | Secondary Encoder | Rationale |
-|------|-----------------|-------------------|-----------|
-| Musicality scoring | MERT | CLAP | MERT captures music; CLAP for evaluation |
-| Voice detection | WavLM | ECAPA-TDNN | Speaker-optimized representations |
-| Content fingerprinting | MERT + Chromaprint | — | Music similarity + exact match |
-| Harmonic analysis | MERT | — | Pre-trained on CQT features |
+| Task | Primary Encoder | Secondary Tools | Rationale |
+|------|-----------------|-----------------|-----------|
+| Prompt adherence | CLAP (laion-music) | — | Text-audio alignment |
+| Musical coherence | MERT-v1-95M | madmom, Essentia | Structure, harmony, rhythm |
+| Audio quality | MERT-v1-95M | Essentia ClickDetector | Artifact detection |
+| Musicality | MERT-v1-95M | TIS computation | Tension-resolution |
+| Originality | MERT-v1-95M | Chromaprint | Fingerprinting + similarity |
+| Voice detection | WavLM | ECAPA-TDNN | Speaker-optimized (Safety Dim. 6) |
 
 ### Vector Storage Architecture
 
@@ -184,30 +215,47 @@ Preprocessed Chunks
 
 ---
 
-## MusiCritic Architecture
+## Unified Evaluation Pipeline
 
 ### System Design
 
+MusiCritic evaluates AI-generated music across **8 dimensions**: 4 quality dimensions and 4 safety dimensions.
+
 ```
-Audio Input
+Audio Input + Text Prompt
      │
      ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                     MUSICRITIC PIPELINE                          │
+│                     MUSICRITIC UNIFIED PIPELINE                  │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐   │
 │  │              FEATURE EXTRACTION LAYER                     │   │
 │  ├──────────────────────────────────────────────────────────┤   │
 │  │                                                           │   │
-│  │  MERT Branch:                                             │   │
-│  │  └─→ Frame embeddings → Layer selection → Projection      │   │
+│  │  MERT Branch (Music Understanding):                       │   │
+│  │  └─→ Frame embeddings → Layer selection → 1024-dim       │   │
 │  │                                                           │   │
-│  │  Symbolic Branch:                                         │   │
-│  │  └─→ Audio-to-MIDI (basic-pitch) → MusicBERT → Embeddings│   │
+│  │  CLAP Branch (Prompt Adherence):                          │   │
+│  │  └─→ Audio encoder + Text encoder → Cosine similarity    │   │
 │  │                                                           │   │
-│  │  Harmonic Branch:                                         │   │
-│  │  └─→ Chord detection (madmom) → TIS computation          │   │
+│  │  Beat/Tempo Branch (Rhythm):                              │   │
+│  │  └─→ madmom DBNBeatTracker → Beat times + Tempo          │   │
+│  │                                                           │   │
+│  │  Harmonic Branch (Chords/Key):                            │   │
+│  │  └─→ Essentia ChordsDetection → TIS computation          │   │
+│  │                                                           │   │
+│  │  Quality Branch (Artifacts):                              │   │
+│  │  └─→ Essentia ClickDetector + Spectral analysis          │   │
+│  │                                                           │   │
+│  │  Copyright Branch (Fingerprinting):                       │   │
+│  │  └─→ Chromaprint → Copyright database similarity search  │   │
+│  │                                                           │   │
+│  │  Voice Branch (Speaker Verification):                     │   │
+│  │  └─→ WavLM → ECAPA-TDNN → Protected voice matching       │   │
+│  │                                                           │   │
+│  │  Content Branch (Safety):                                 │   │
+│  │  └─→ ASR + NLP → Harm category classification            │   │
 │  │                                                           │   │
 │  └──────────────────────────────────────────────────────────┘   │
 │                          │                                       │
@@ -230,42 +278,60 @@ Audio Input
 │                          │                                       │
 │                          ▼                                       │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │              MULTI-TASK PREDICTION HEADS                  │   │
+│  │         MULTI-TASK PREDICTION HEADS (8 Dimensions)        │   │
 │  ├──────────────────────────────────────────────────────────┤   │
 │  │                                                           │   │
 │  │  Shared Trunk (cross-attention fusion)                    │   │
 │  │       │                                                   │   │
-│  │       ├──→ Pitch/Intonation Head ──→ Score + Confidence  │   │
-│  │       ├──→ Rhythm/Timing Head ──→ Score + Confidence     │   │
-│  │       ├──→ Dynamics Head ──→ Score + Confidence          │   │
-│  │       ├──→ Phrasing Head ──→ Score + Confidence          │   │
-│  │       ├──→ Articulation Head ──→ Score + Confidence      │   │
-│  │       ├──→ Harmonic Head ──→ Score + Confidence          │   │
-│  │       ├──→ Structure Head ──→ Score + Confidence         │   │
-│  │       ├──→ Expression Head ──→ Score + Confidence        │   │
-│  │       └──→ Overall Musicality ──→ Score + Confidence     │   │
+│  │       │  QUALITY HEADS (Dimensions 1-4):                  │   │
+│  │       ├──→ Prompt Adherence ──→ Score + Confidence       │   │
+│  │       ├──→ Musical Coherence ──→ Score + Confidence      │   │
+│  │       ├──→ Audio Quality ──→ Score + Confidence          │   │
+│  │       ├──→ Musicality ──→ Score + Confidence             │   │
+│  │       │                                                   │   │
+│  │       │  SAFETY HEADS (Dimensions 5-8):                   │   │
+│  │       ├──→ Copyright/Originality ──→ Score + Flag        │   │
+│  │       ├──→ Voice Cloning ──→ Score + Flag                │   │
+│  │       ├──→ Cultural Sensitivity ──→ Score + Flag         │   │
+│  │       ├──→ Content Safety ──→ Score + Flag               │   │
+│  │       │                                                   │   │
+│  │       │  AGGREGATE OUTPUTS:                               │   │
+│  │       ├──→ Overall Quality Score (0-100)                 │   │
+│  │       └──→ Safety Decision (ALLOW / FLAG / BLOCK)        │   │
 │  │                                                           │   │
 │  └──────────────────────────────────────────────────────────┘   │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
      │
      ▼
-Multi-Dimensional Score Output
+Unified Evaluation Output (Quality Score + Safety Decision)
 ```
 
 ### Model Architecture Details
 
 **Feature Fusion Module:**
 
-The system fuses three complementary feature streams using cross-attention:
+The system fuses multiple complementary feature streams using cross-attention:
+
+**Quality Streams:**
 
 | Stream | Source | Dimension | Information Captured |
 |--------|--------|-----------|---------------------|
-| Acoustic | MERT layers 18-24 | 1024 | Timbre, rhythm, pitch |
-| Symbolic | MusicBERT | 768 | Harmony, structure |
-| Tension | TIS computation | 3 | Harmonic tension curve |
+| Acoustic | MERT-v1-95M layers 18-24 | 1024 | Timbre, rhythm, pitch |
+| Text-Audio | CLAP (laion-music) | 1024 | Prompt adherence |
+| Rhythm | madmom DBNBeatTracker | Variable | Beat positions, tempo |
+| Harmonic | Essentia + TIS | Variable | Chords, key, tension |
+| Quality | Essentia ClickDetector | Variable | Artifacts, clicks |
 
-Fusion uses learned cross-attention where acoustic features attend to symbolic features, enabling the model to ground abstract harmonic concepts in acoustic reality.
+**Safety Streams:**
+
+| Stream | Source | Dimension | Information Captured |
+|--------|--------|-----------|---------------------|
+| Copyright | Chromaprint + MERT | 1024 | Melody/sample similarity |
+| Speaker | WavLM + ECAPA-TDNN | 192 | Voice identity |
+| Content | MERT + ASR + NLP | Variable | Harm categories |
+
+Fusion uses learned cross-attention where acoustic features attend to text-audio alignment features for quality, and speaker features attend to the protected voice database for safety.
 
 **Temporal Aggregation:**
 
@@ -307,12 +373,14 @@ Each musicality dimension has a dedicated head with shared lower layers:
 **Training Objective:**
 
 ```
-L_total = λ₁ · L_regression + λ₂ · L_ranking + λ₃ · L_consistency
+L_total = λ₁ · L_regression + λ₂ · L_ranking + λ₃ · L_consistency + λ₄ · L_clap + λ₅ · L_triplet
 
 Where:
 - L_regression: MSE between predicted and annotated scores
-- L_ranking: Pairwise margin ranking loss for comparative pairs
+- L_ranking: Pairwise margin ranking loss (AIME dataset compatible)
 - L_consistency: Correlation loss ensuring dimension scores are coherent
+- L_clap: CLAP cosine similarity loss for prompt adherence
+- L_triplet: Triplet loss for originality (melody/rhythm plagiarism detection)
 ```
 
 ### Tension-Resolution Module
@@ -355,168 +423,162 @@ Audio → Chord Detection (madmom) → Chord Sequence
 | Cloud Momentum | Rate of harmonic change | 0-1 |
 | Tensile Strain | Distance from tonal center | 0-1 |
 
+### Prompt Adherence Module
+
+Measures how well AI-generated audio matches the input text prompt using CLAP embeddings.
+
+```
+Text Prompt                           Audio Input
+     │                                      │
+     ▼                                      ▼
+┌─────────────────────┐           ┌─────────────────────┐
+│  CLAP Text Encoder  │           │  CLAP Audio Encoder │
+│  (laion-music)      │           │  (laion-music)      │
+└─────────────────────┘           └─────────────────────┘
+     │                                      │
+     ▼                                      ▼
+   Text Embedding (1024-dim)        Audio Embedding (1024-dim)
+     │                                      │
+     └──────────────┬───────────────────────┘
+                    │
+                    ▼
+            Cosine Similarity
+                    │
+                    ▼
+         Prompt Adherence Score (0-1)
+```
+
+**Thresholds:**
+- >0.7: Strong prompt adherence
+- 0.5-0.7: Moderate adherence
+- <0.5: Poor adherence (flag for review)
+
+### AI Artifact Detection Module
+
+Detects artifacts specific to AI-generated audio using spectral analysis and dedicated detectors.
+
+```
+Audio Input
+     │
+     ├──────────────────┬──────────────────┐
+     ▼                  ▼                  ▼
+┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│  Spectral   │  │  Essentia   │  │  Loudness   │
+│  Analysis   │  │ ClickDetect │  │  Analysis   │
+├─────────────┤  ├─────────────┤  ├─────────────┤
+│ Peak detect │  │ Transient   │  │ LUFS meas.  │
+│ for AI      │  │ artifact    │  │ LRA calc.   │
+│ fingerprint │  │ detection   │  │ True Peak   │
+└─────────────┘  └─────────────┘  └─────────────┘
+     │                  │                  │
+     └──────────────────┴──────────────────┘
+                        │
+                        ▼
+              Audio Quality Score
+```
+
+**Quality Targets:**
+- Loudness: -14 LUFS (streaming standard)
+- True Peak: <-1 dBTP
+- Artifacts: 0 detected (ideal)
+
+### Originality Detection Module
+
+Detects potential plagiarism or excessive similarity to existing music using fingerprinting and embedding similarity.
+
+```
+Audio Input
+     │
+     ├──────────────────┬──────────────────┐
+     ▼                  ▼                  ▼
+┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│ Chromaprint │  │ MERT        │  │  Melody     │
+│ Fingerprint │  │ Embeddings  │  │  Extraction │
+├─────────────┤  ├─────────────┤  ├─────────────┤
+│ Exact match │  │ Semantic    │  │ Pitch track │
+│ database    │  │ similarity  │  │ + contour   │
+│ lookup      │  │ search      │  │ comparison  │
+└─────────────┘  └─────────────┘  └─────────────┘
+     │                  │                  │
+     └──────────────────┴──────────────────┘
+                        │
+                        ▼
+              Originality Score + Matches
+```
+
+**Key Insight:** Melody + rhythm combination is prioritized (harmony alone insufficient for plagiarism detection since many songs share common progressions).
+
+### Performance Budget
+
+Target: **<2 seconds** for 30-second audio clip.
+
+| Component | Time (GPU) | Time (CPU) | Notes |
+|-----------|------------|------------|-------|
+| MERT-v1-95M | 600ms | 1.5s | 6 chunks x 100ms |
+| CLAP | 240ms | 600ms | 3 chunks x 80ms |
+| madmom | 150ms | 200ms | Beat tracking |
+| Essentia | 200ms | 500ms | Chords, key, clicks |
+| Aggregation | 50ms | 100ms | Feature fusion |
+| **Total** | **~1.2s** | **~2.9s** | GPU recommended |
+
+**Optimization Strategies:**
+- FP16 inference: 50% memory reduction, ~1.5-2x speedup
+- Batch processing: Group multiple clips for GPU efficiency
+- Embedding caching: Redis with 7-day TTL for repeated evaluations
+- Parallel extraction: Run MERT, CLAP, madmom, Essentia concurrently
+
 ---
 
-## Constitutional Audio Architecture
+## Safety Dimensions Architecture
 
-### System Design
+The safety dimensions (5-8) use specialized modules for detecting harmful content in AI-generated music.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                 CONSTITUTIONAL AUDIO PIPELINE                    │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────┐     │
-│  │                  INPUT CLASSIFIER                       │     │
-│  ├────────────────────────────────────────────────────────┤     │
-│  │                                                         │     │
-│  │  Text Prompt ──→ Intent Analysis ──→ Policy Check      │     │
-│  │       │              │                    │             │     │
-│  │       │              │                    ▼             │     │
-│  │       │              │         ┌─────────────────┐     │     │
-│  │       │              │         │ BLOCK / ALLOW / │     │     │
-│  │       │              │         │ FLAG FOR REVIEW │     │     │
-│  │       │              │         └─────────────────┘     │     │
-│  │       │              │                                  │     │
-│  │       ▼              ▼                                  │     │
-│  │  Artist Request  Voice Request                          │     │
-│  │  Detection       Detection                              │     │
-│  │                                                         │     │
-│  └────────────────────────────────────────────────────────┘     │
-│                          │                                       │
-│                          ▼ (if allowed)                          │
-│  ┌────────────────────────────────────────────────────────┐     │
-│  │              AUDIO GENERATION MODEL                     │     │
-│  │         (External - not part of this system)           │     │
-│  └────────────────────────────────────────────────────────┘     │
-│                          │                                       │
-│                          ▼                                       │
-│  ┌────────────────────────────────────────────────────────┐     │
-│  │              OUTPUT CLASSIFIER (STREAMING)              │     │
-│  ├────────────────────────────────────────────────────────┤     │
-│  │                                                         │     │
-│  │  Audio Chunks ──→ Parallel Analysis:                   │     │
-│  │       │                                                 │     │
-│  │       ├──→ Speaker Similarity (ECAPA-TDNN)             │     │
-│  │       │         └─→ Match against protected voices     │     │
-│  │       │                                                 │     │
-│  │       ├──→ Content Fingerprint (Chromaprint)           │     │
-│  │       │         └─→ Match against copyright database   │     │
-│  │       │                                                 │     │
-│  │       ├──→ Harm Classification (Multi-label)           │     │
-│  │       │         └─→ 7 harm categories                  │     │
-│  │       │                                                 │     │
-│  │       └──→ Cumulative Probability Aggregation          │     │
-│  │                    │                                    │     │
-│  │                    ▼                                    │     │
-│  │         ┌─────────────────────────────────┐            │     │
-│  │         │ Threshold Check:                 │            │     │
-│  │         │ • Hard block (p > 0.95)         │            │     │
-│  │         │ • Flag for review (p > 0.7)     │            │     │
-│  │         │ • Allow (p < 0.7)               │            │     │
-│  │         └─────────────────────────────────┘            │     │
-│  │                                                         │     │
-│  └────────────────────────────────────────────────────────┘     │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-```
+### Safety Detection Modules
 
-### Classifier Architectures
+| Dimension | Detection Approach | Model |
+|-----------|-------------------|-------|
+| Copyright/Originality | Fingerprint matching + embedding similarity | Chromaprint + MERT |
+| Voice Cloning | Speaker verification against protected database | WavLM + ECAPA-TDNN |
+| Cultural Sensitivity | Pattern matching + flagging (human review required) | Fine-tuned classifier |
+| Content Safety | Hate/harmful content via ASR + NLP | Audio + ASR + NLP pipeline |
 
-**Input Classifier:**
+### Voice Cloning Detection Module
 
 ```
-Text Prompt
+Audio Input
      │
      ▼
-┌─────────────────────────────────────────┐
-│        TEXT ENCODER (RoBERTa-base)       │
-└─────────────────────────────────────────┘
+┌─────────────────────┐
+│  SPEAKER ANALYZER   │
+├─────────────────────┤
+│                     │
+│  WavLM → ECAPA-TDNN │
+│        │            │
+│        ▼            │
+│  Speaker Embedding  │
+│  (192-dim)          │
+│        │            │
+│        ▼            │
+│  FAISS Similarity   │
+│  Search             │
+│        │            │
+│        ▼            │
+│  Protected Voice    │
+│  Match Score        │
+│                     │
+└─────────────────────┘
      │
      ▼
-┌─────────────────────────────────────────┐
-│         CLASSIFICATION HEADS             │
-├─────────────────────────────────────────┤
-│                                          │
-│  Intent Head:                            │
-│  └─→ benign / suspicious / malicious    │
-│                                          │
-│  Artist Request Head:                    │
-│  └─→ None / Named artist / Style ref    │
-│                                          │
-│  Voice Request Head:                     │
-│  └─→ None / Celebrity / Politician      │
-│                                          │
-│  Policy Violation Head:                  │
-│  └─→ Multi-label (7 harm categories)    │
-│                                          │
-└─────────────────────────────────────────┘
-     │
-     ▼
-Decision: BLOCK / ALLOW / MODIFY_PROMPT
+Decision: ALLOW / FLAG / BLOCK
 ```
 
-**Output Classifier (Streaming):**
+### Safety Threshold Configuration
 
-Processes audio in real-time during generation:
-
-```
-Audio Stream (chunked at 1-second intervals)
-     │
-     ├─────────────────────────────────────────────────────┐
-     │                                                      │
-     ▼                                                      ▼
-┌─────────────────────┐                          ┌─────────────────────┐
-│  SPEAKER ANALYZER   │                          │  CONTENT ANALYZER   │
-├─────────────────────┤                          ├─────────────────────┤
-│                     │                          │                     │
-│  WavLM → ECAPA-TDNN │                          │  MERT → Harm Heads  │
-│        │            │                          │        │            │
-│        ▼            │                          │        ▼            │
-│  Speaker Embedding  │                          │  Content Embedding  │
-│  (192-dim)          │                          │  (1024-dim)         │
-│        │            │                          │        │            │
-│        ▼            │                          │        ▼            │
-│  FAISS Similarity   │                          │  Multi-label        │
-│  Search             │                          │  Classification     │
-│        │            │                          │        │            │
-│        ▼            │                          │        ▼            │
-│  Protected Voice    │                          │  Harm Probabilities │
-│  Match Score        │                          │  (7 categories)     │
-│                     │                          │                     │
-└─────────────────────┘                          └─────────────────────┘
-     │                                                      │
-     └──────────────────────┬───────────────────────────────┘
-                            │
-                            ▼
-                 ┌─────────────────────────┐
-                 │  AGGREGATION MODULE     │
-                 ├─────────────────────────┤
-                 │                         │
-                 │  Cumulative scoring:    │
-                 │  • Max pooling          │
-                 │  • Exponential decay    │
-                 │  • Threshold tracking   │
-                 │                         │
-                 └─────────────────────────┘
-                            │
-                            ▼
-                 Decision: CONTINUE / INTERVENE / STOP
-```
-
-### Harm Classification Details
-
-**Multi-Label Classifier Architecture:**
-
-| Harm Category | Detection Approach | Model |
-|---------------|-------------------|-------|
-| Copyright/IP | Fingerprint matching + embedding similarity | Chromaprint + MERT |
-| Voice Cloning | Speaker verification | ECAPA-TDNN |
-| Cultural | Pattern matching + flagging | Fine-tuned classifier |
-| Misinformation | Synthetic speech detection | SKA-TDNN |
-| Emotional | Subliminal pattern detection | Specialized analyzer |
-| Content Safety | Hate/harmful content | Audio + ASR + NLP |
-| Physical Safety | Frequency analysis | Signal processing |
+| Threshold | Action | Use Case |
+|-----------|--------|----------|
+| p > 0.95 | BLOCK | High-confidence safety violation |
+| 0.7 < p < 0.95 | FLAG | Requires human review |
+| p < 0.7 | ALLOW | No safety concerns detected |
 
 **Artist Protection System:**
 
@@ -565,62 +627,26 @@ Audio Stream (chunked at 1-second intervals)
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Training Strategy
+### Safety Training Strategy
 
-**Constitutional Classifier Training (Following Anthropic's Approach):**
+**Training the Safety Classifiers (Following Anthropic's Constitutional AI Approach):**
 
-```
-Phase 1: Generate Synthetic Training Data
-┌─────────────────────────────────────────────────────────────────┐
-│                                                                  │
-│  1. Define Constitution (natural language safety rules)         │
-│                                                                  │
-│  2. Generate harmful prompts using Claude API:                  │
-│     • Diverse attack vectors                                    │
-│     • Edge cases and adversarial examples                       │
-│     • Multi-turn conversations                                  │
-│                                                                  │
-│  3. Generate safe variations of similar prompts                 │
-│                                                                  │
-│  4. Label with harm categories                                  │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+1. **Generate Synthetic Training Data**
+   - Define safety constitution (natural language rules)
+   - Generate adversarial prompts covering edge cases
+   - Create safe variations for contrastive learning
+   - Label with safety categories
 
-Phase 2: Train Input Classifier
-┌─────────────────────────────────────────────────────────────────┐
-│                                                                  │
-│  • Fine-tune RoBERTa on prompt classification                   │
-│  • Multi-label binary cross-entropy loss                        │
-│  • Optimize for high recall (catch harmful content)             │
-│  • Accept higher false positive rate (can be reviewed)          │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+2. **Train Safety Heads**
+   - Fine-tune safety prediction heads on MERT features
+   - Multi-label binary cross-entropy loss
+   - Optimize for high recall (minimize false negatives)
+   - Calibrate thresholds on validation set
 
-Phase 3: Train Output Classifier
-┌─────────────────────────────────────────────────────────────────┐
-│                                                                  │
-│  • Collect audio outputs from generation model                  │
-│  • Label for harm categories (automated + human)                │
-│  • Fine-tune MERT heads for harm detection                      │
-│  • Calibrate thresholds on validation set                       │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-
-Phase 4: DPO Alignment (Optional - for generation model)
-┌─────────────────────────────────────────────────────────────────┐
-│                                                                  │
-│  • Build preference dataset (90K+ triplets):                    │
-│    - Prompt                                                     │
-│    - Preferred output (safe, high quality)                      │
-│    - Dispreferred output (harmful or low quality)               │
-│                                                                  │
-│  • Multi-reward DPO with three dimensions:                      │
-│    - Text alignment (CLAP score)                                │
-│    - Audio quality (MusiCritic score)                           │
-│    - Safety compliance (Constitutional classifier)               │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-```
+3. **Adversarial Red-Teaming**
+   - Continuous testing with jailbreak prompts
+   - Evasion technique detection
+   - Attack success rate monitoring (<2% target)
 
 ---
 
@@ -641,7 +667,6 @@ Phase 4: DPO Alignment (Optional - for generation model)
 │  │  • Cost: Pay per second of compute                      │    │
 │  │  │                                                       │    │
 │  │  modal deploy musicritic/serve.py                       │    │
-│  │  modal deploy constitutional_audio/serve.py             │    │
 │  └─────────────────────────────────────────────────────────┘    │
 │                                                                  │
 │  Option 2: Self-Hosted (Docker + K8s)                           │
@@ -672,82 +697,99 @@ Phase 4: DPO Alignment (Optional - for generation model)
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/v1/musicritic/evaluate` | POST | Full musicality evaluation |
-| `/v1/musicritic/compare` | POST | Pairwise comparison |
-| `/v1/musicritic/dimensions/{dim}` | POST | Single dimension score |
-| `/v1/constitutional/classify` | POST | Full harm classification |
-| `/v1/constitutional/stream` | WS | Streaming classification |
-| `/v1/constitutional/register-voice` | POST | Artist voice registration |
-| `/v1/constitutional/check-voice` | POST | Voice similarity check |
+| `/v1/evaluate` | POST | Full unified evaluation (quality + safety) |
+| `/v1/evaluate/quality` | POST | Quality dimensions only (faster) |
+| `/v1/evaluate/safety` | POST | Safety dimensions only (faster) |
+| `/v1/compare` | POST | Pairwise comparison |
+| `/v1/dimensions/{dim}` | POST | Single dimension score |
+| `/v1/voices/register` | POST | Artist voice registration |
+| `/v1/voices/check` | POST | Voice similarity check |
 | `/health` | GET | Service health check |
 
-**Request/Response Schema (MusiCritic):**
+**Request/Response Schema (Unified Evaluation):**
 
 ```
-POST /v1/musicritic/evaluate
+POST /v1/evaluate
 
 Request:
 {
   "audio": "<base64-encoded-audio>",
   "format": "wav",
   "sample_rate": 44100,
-  "dimensions": ["all"],  // or specific: ["pitch", "rhythm", "phrasing"]
+  "prompt": "An upbeat electronic dance track with synth leads",
+  "dimensions": ["all"],  // or specific: ["prompt_adherence", "coherence", "copyright"]
   "return_temporal": false,
-  "reference_genre": "classical_piano"  // optional
+  "reference_genre": "electronic"  // optional
 }
 
 Response:
 {
-  "overall_score": 78.5,
+  "quality_score": 78.5,
+  "safety_decision": "ALLOW",
   "confidence": 0.92,
-  "dimensions": {
-    "pitch_accuracy": {"score": 85.2, "confidence": 0.95},
-    "rhythmic_precision": {"score": 72.1, "confidence": 0.89},
-    "phrasing": {"score": 81.0, "confidence": 0.87},
-    "dynamics": {"score": 76.3, "confidence": 0.91},
-    "articulation": {"score": 79.8, "confidence": 0.88},
-    "harmonic_sophistication": {"score": 74.5, "confidence": 0.85},
-    "structural_coherence": {"score": 80.2, "confidence": 0.86},
-    "expression": {"score": 77.9, "confidence": 0.84}
+
+  "quality_dimensions": {
+    "prompt_adherence": {
+      "score": 82.3,
+      "confidence": 0.91,
+      "clap_similarity": 0.73
+    },
+    "musical_coherence": {
+      "score": 76.5,
+      "confidence": 0.88,
+      "structure": {
+        "verse_chorus_detected": true,
+        "sections": [{"type": "intro", "start": 0.0, "end": 8.2}]
+      },
+      "harmony": {"key": "C major", "chord_progression_quality": 0.81},
+      "rhythm": {"tempo_bpm": 128, "stability": 0.94}
+    },
+    "audio_quality": {
+      "score": 85.1,
+      "confidence": 0.93,
+      "artifacts_detected": 2,
+      "loudness_lufs": -13.2,
+      "true_peak_dbtp": -0.8
+    },
+    "musicality": {
+      "score": 74.2,
+      "confidence": 0.85,
+      "tension_resolution": 0.72
+    }
   },
-  "explanation": "Strong technical foundation with room for improvement in rhythmic precision. Phrasing shows musical understanding.",
+
+  "safety_dimensions": {
+    "copyright_originality": {
+      "score": 0.12,
+      "decision": "ALLOW",
+      "fingerprint_matches": []
+    },
+    "voice_cloning": {
+      "score": 0.05,
+      "decision": "ALLOW",
+      "matched_voices": []
+    },
+    "cultural_sensitivity": {
+      "score": 0.08,
+      "decision": "ALLOW",
+      "flags": []
+    },
+    "content_safety": {
+      "score": 0.03,
+      "decision": "ALLOW",
+      "detected_issues": []
+    }
+  },
+
+  "explanation": "Good prompt adherence with clear electronic elements. Structure is coherent with proper verse-chorus form. Minor artifacts detected. No safety concerns.",
   "processing_time_ms": 1450
 }
 ```
 
-**Request/Response Schema (Constitutional Audio):**
-
-```
-POST /v1/constitutional/classify
-
-Request:
-{
-  "audio": "<base64-encoded-audio>",
-  "format": "wav",
-  "prompt": "Generate a song in the style of...",  // optional
-  "check_categories": ["all"]
-}
-
-Response:
-{
-  "decision": "FLAG_FOR_REVIEW",
-  "harm_scores": {
-    "copyright_ip": {"score": 0.72, "details": "High similarity to protected work"},
-    "voice_cloning": {"score": 0.15, "details": null},
-    "cultural": {"score": 0.08, "details": null},
-    "misinformation": {"score": 0.05, "details": null},
-    "emotional_manipulation": {"score": 0.12, "details": null},
-    "content_safety": {"score": 0.03, "details": null},
-    "physical_safety": {"score": 0.01, "details": null}
-  },
-  "matched_fingerprints": [
-    {"source": "Song Title - Artist", "similarity": 0.72, "segment": "0:15-0:45"}
-  ],
-  "matched_voices": [],
-  "recommended_action": "Human review required for copyright concern",
-  "processing_time_ms": 320
-}
-```
+**Safety Decision Values:**
+- `ALLOW`: No safety concerns detected (all safety scores < 0.7)
+- `FLAG`: Requires human review (any safety score 0.7-0.95)
+- `BLOCK`: High-confidence safety violation (any safety score > 0.95)
 
 ---
 
@@ -755,23 +797,23 @@ Response:
 
 ### Training Data Sources
 
-**MusiCritic:**
+**Quality Dimensions (1-4):**
 
 | Dataset | Size | Use | License |
 |---------|------|-----|---------|
-| MAESTRO v3.0.0 | 200 hours | Piano evaluation training | CC BY-NC-SA 4.0 |
-| PercePiano | 12,736 annotations | Perceptual feature labels | Academic |
-| MTG-Jamendo | 55,000 tracks | Genre diversity | CC variants |
-| MusicCaps | 5,521 clips | Text descriptions | CC BY-SA 4.0 |
-| Custom annotations | ~10,000 pairs | Pairwise preferences | Proprietary |
+| AIME | 6,500 tracks, 15,600 pairwise comparisons | Primary validation benchmark (AI-generated music) | CC BY-4.0 |
+| MusicPrefs | 7 models, pairwise preferences | Secondary validation | Open-source |
+| MTG-Jamendo | 55,000 tracks | Genre diversity, reference corpus | CC variants |
+| MusicCaps | 5,521 clips | Text-audio alignment training | CC BY-SA 4.0 |
+| MARBLE | 18 tasks, 12 datasets | Music understanding benchmarking | Various |
 
-**Constitutional Audio:**
+**Safety Dimensions (5-8):**
 
 | Dataset | Size | Use | License |
 |---------|------|-----|---------|
 | VoxCeleb2 | 1M utterances | Speaker verification training | Research only |
-| ASVspoof 2019 | 54,000 samples | Deepfake detection | CC BY 4.0 |
-| Custom adversarial | ~50,000 prompts | Input classifier training | Proprietary |
+| ASVspoof 2019 | 54,000 samples | Deepfake/voice clone detection | CC BY 4.0 |
+| Custom adversarial | ~50,000 prompts | Safety classifier training | Proprietary |
 | Artist registry | Growing | Protected voice matching | Artist consent |
 
 ### Annotation Pipeline
@@ -807,20 +849,20 @@ Response:
 
 ### Metrics
 
-**MusiCritic:**
+**Quality Dimensions:**
 
 - Human correlation (weekly validation study)
 - Dimension calibration (predicted vs. actual distribution)
 - Inference latency (p50, p95, p99)
 - Throughput (requests/minute)
 
-**Constitutional Audio:**
+**Safety Dimensions:**
 
-- Attack success rate (adversarial benchmark)
+- Attack success rate (adversarial benchmark, <2% target)
 - False positive rate (over-refusal)
 - False negative rate (missed harmful content)
-- Artist match precision/recall
-- Latency for streaming classification
+- Voice match precision/recall
+- Copyright detection accuracy
 
 ### Logging
 
@@ -871,13 +913,16 @@ Response:
 
 | Model | Music Performance | License | Inference Speed | Memory |
 |-------|------------------|---------|-----------------|--------|
+| **MERT-v1-95M** | Strong on MIR tasks, fits latency budget | CC-BY-NC-4.0 | 100ms/5s chunk | 0.4 GB |
 | MERT-v1-330M | SOTA on 14 MIR tasks | CC-BY-NC-4.0 | 45ms/5s chunk | 1.5 GB |
+| CLAP (laion-music) | Best text-audio alignment | Apache 2.0 | 80ms/10s chunk | 0.8 GB |
 | Wav2Vec2-Large | Good general audio | MIT | 35ms/5s chunk | 1.2 GB |
 | HuBERT-Large | Strong speech | MIT | 38ms/5s chunk | 1.2 GB |
 | WavLM-Large | Best speaker tasks | MIT | 40ms/5s chunk | 1.2 GB |
-| Jukebox | Music generation | MIT | 500ms/5s chunk | 5+ GB |
 
-**Recommendation:** MERT for music understanding, WavLM for speaker analysis, both for comprehensive coverage.
+**Recommendation:**
+- **Quality Dimensions (1-4):** MERT-v1-95M (latency) + CLAP laion-music (prompt adherence) + madmom/Essentia (rhythm/harmony)
+- **Safety Dimensions (5-8):** WavLM for speaker analysis, ECAPA-TDNN for voice fingerprinting, Chromaprint for copyright
 
 ### Vector Database Comparison
 

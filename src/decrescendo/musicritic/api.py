@@ -1,14 +1,14 @@
-"""FastAPI server for Constitutional Audio.
+"""FastAPI server for MusiCritic.
 
 Provides REST API endpoints for prompt/audio classification,
 voice enrollment, and management.
 
 Usage:
     Start via CLI:
-        constitutional-audio serve --host 0.0.0.0 --port 8000
+        musicritic serve --host 0.0.0.0 --port 8000
 
     Or directly:
-        uvicorn decrescendo.constitutional_audio.api:app --host 0.0.0.0 --port 8000
+        uvicorn decrescendo.musicritic.api:app --host 0.0.0.0 --port 8000
 """
 
 from __future__ import annotations
@@ -113,8 +113,8 @@ def create_app(
     global _pipeline, _voice_database, _voice_enroller, _config
 
     app = FastAPI(
-        title="Constitutional Audio API",
-        description="Safety classification API for AI-generated audio",
+        title="MusiCritic API",
+        description="Unified evaluation API for AI-generated music",
         version="0.1.0",
         docs_url="/docs",
         redoc_url="/redoc",

@@ -5,21 +5,21 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
-from decrescendo.constitutional_audio.output_classifier.audio_preprocessing import (
+from decrescendo.musicritic.output_classifier.audio_preprocessing import (
     AudioPreprocessor,
 )
-from decrescendo.constitutional_audio.output_classifier.config import (
+from decrescendo.musicritic.output_classifier.config import (
     AudioEncoderConfig,
     OutputClassifierConfig,
     PreprocessingConfig,
 )
-from decrescendo.constitutional_audio.output_classifier.inference import (
+from decrescendo.musicritic.output_classifier.inference import (
     Decision,
     OutputClassifierInference,
     ScoreAggregator,
     initialize_output_classifier,
 )
-from decrescendo.constitutional_audio.output_classifier.model import (
+from decrescendo.musicritic.output_classifier.model import (
     AudioEncoder,
     HarmClassifier,
     OutputClassifierModel,
@@ -135,7 +135,7 @@ class TestSpeakerEncoder:
     @pytest.fixture
     def encoder(self):
         """Create speaker encoder."""
-        from decrescendo.constitutional_audio.output_classifier.config import SpeakerConfig
+        from decrescendo.musicritic.output_classifier.config import SpeakerConfig
         return SpeakerEncoder(config=SpeakerConfig())
 
     def test_speaker_encoder_output_normalized(self, encoder, rng):
