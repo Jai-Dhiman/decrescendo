@@ -63,9 +63,9 @@ serve = [
     "python-multipart>=0.0.6",
 ]
 
-# Quality dimension dependencies (minimal - for CLAP/prompt adherence)
+# Quality dimension dependencies (CLAP/prompt adherence via HuggingFace transformers)
 clap = [
-    "laion-clap>=1.1.4",
+    "torch>=2.0.0",
 ]
 
 # Audio fingerprinting

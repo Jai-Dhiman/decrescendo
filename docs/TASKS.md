@@ -186,18 +186,18 @@ src/decrescendo/musicritic/
 
 ### Phase 2: Quality Dimensions
 
-#### 2.1 Prompt Adherence (Dimension 1)
+#### 2.1 Prompt Adherence (Dimension 1) [DONE]
 **Priority:** High (quick win, CLAP is straightforward)
-**Dependencies:** laion-clap package
+**Dependencies:** torch (uses HuggingFace transformers CLAP)
 **Files:** `dimensions/prompt_adherence/`
 
-- [ ] Create `CLAPEncoder` wrapper class
-  - Load `laion/larger_clap_music` model
-  - Implement `encode_text(prompt) -> embedding`
-  - Implement `encode_audio(audio, sr) -> embedding`
-  - Add caching for repeated prompts
+- [x] Create `CLAPEncoder` wrapper class
+  - Load `laion/larger_clap_music` model via HuggingFace transformers
+  - Implement `encode_text(prompt) -> embedding` with caching
+  - Implement `encode_audio(audio, sr) -> embedding` with auto-resampling
+  - Add text embedding caching for repeated prompts
 
-- [ ] Create `PromptAdherenceEvaluator`
+- [x] Create `PromptAdherenceEvaluator`
   - Implement `_evaluate_impl()` method
   - Compute cosine similarity between text and audio embeddings
   - Return score with thresholds:
@@ -210,13 +210,13 @@ src/decrescendo/musicritic/
   - Use CLAP zero-shot classification
   - Compare detected vs expected from prompt
 
-- [ ] Write tests (target: 15+ tests)
-  - Test encoder loading
-  - Test text embedding extraction
-  - Test audio embedding extraction
+- [x] Write tests (27 tests, target was 15+)
+  - Test encoder loading and lazy initialization
+  - Test text embedding extraction (single and batch)
+  - Test audio embedding extraction with resampling
   - Test similarity computation
   - Test threshold classification
-  - Test with various prompts and audio
+  - Test evaluator integration
 
 ---
 

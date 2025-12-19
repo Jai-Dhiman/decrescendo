@@ -16,6 +16,7 @@ Safety Dimensions (5-8):
 """
 
 from .base import (
+    BaseDimensionEvaluator,
     DimensionCategory,
     DimensionEvaluator,
     DimensionResult,
@@ -24,8 +25,16 @@ from .base import (
     QualityDimension,
     SafetyDimension,
 )
+from .prompt_adherence import (
+    CLAPEncoder,
+    CLAPEncoderConfig,
+    PromptAdherenceConfig,
+    PromptAdherenceEvaluator,
+)
 
 __all__ = [
+    # Base classes
+    "BaseDimensionEvaluator",
     "DimensionCategory",
     "DimensionEvaluator",
     "DimensionResult",
@@ -33,4 +42,9 @@ __all__ = [
     "EvaluationConfig",
     "QualityDimension",
     "SafetyDimension",
+    # Prompt Adherence
+    "CLAPEncoder",
+    "CLAPEncoderConfig",
+    "PromptAdherenceConfig",
+    "PromptAdherenceEvaluator",
 ]
