@@ -13,7 +13,6 @@ from typing import Any, Protocol, TypeVar, runtime_checkable
 
 import numpy as np
 
-
 # -----------------------------------------------------------------------------
 # Enums
 # -----------------------------------------------------------------------------
@@ -132,9 +131,7 @@ class DimensionResult:
         if not 0.0 <= self.score <= 1.0:
             raise ValueError(f"Score must be between 0.0 and 1.0, got {self.score}")
         if not 0.0 <= self.confidence <= 1.0:
-            raise ValueError(
-                f"Confidence must be between 0.0 and 1.0, got {self.confidence}"
-            )
+            raise ValueError(f"Confidence must be between 0.0 and 1.0, got {self.confidence}")
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
@@ -177,8 +174,7 @@ class QualityResult:
             "confidence": self.confidence,
             "explanation": self.explanation,
             "dimensions": {
-                dim.value: result.to_dict()
-                for dim, result in self.dimension_results.items()
+                dim.value: result.to_dict() for dim, result in self.dimension_results.items()
             },
         }
 
@@ -206,8 +202,7 @@ class SafetyResult:
             "flags": self.flags,
             "evidence": self.evidence,
             "dimensions": {
-                dim.value: result.to_dict()
-                for dim, result in self.dimension_results.items()
+                dim.value: result.to_dict() for dim, result in self.dimension_results.items()
             },
         }
 
@@ -427,25 +422,19 @@ class DimensionRegistry:
         if evaluator.category == DimensionCategory.QUALITY:
             dim = evaluator.dimension
             if not isinstance(dim, QualityDimension):
-                raise ValueError(
-                    f"Quality evaluator must have QualityDimension, got {type(dim)}"
-                )
+                raise ValueError(f"Quality evaluator must have QualityDimension, got {type(dim)}")
             if dim in self._quality_evaluators:
                 raise ValueError(f"Evaluator for {dim.value} already registered")
             self._quality_evaluators[dim] = evaluator
         else:
             dim = evaluator.dimension
             if not isinstance(dim, SafetyDimension):
-                raise ValueError(
-                    f"Safety evaluator must have SafetyDimension, got {type(dim)}"
-                )
+                raise ValueError(f"Safety evaluator must have SafetyDimension, got {type(dim)}")
             if dim in self._safety_evaluators:
                 raise ValueError(f"Evaluator for {dim.value} already registered")
             self._safety_evaluators[dim] = evaluator
 
-    def get(
-        self, dimension: QualityDimension | SafetyDimension
-    ) -> DimensionEvaluator | None:
+    def get(self, dimension: QualityDimension | SafetyDimension) -> DimensionEvaluator | None:
         """Get evaluator for a dimension.
 
         Args:
@@ -468,9 +457,7 @@ class DimensionRegistry:
 
     def list_registered(self) -> list[QualityDimension | SafetyDimension]:
         """List all registered dimensions."""
-        return list(self._quality_evaluators.keys()) + list(
-            self._safety_evaluators.keys()
-        )
+        return list(self._quality_evaluators.keys()) + list(self._safety_evaluators.keys())
 
     def __len__(self) -> int:
         """Number of registered evaluators."""

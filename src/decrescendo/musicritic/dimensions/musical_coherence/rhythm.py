@@ -135,9 +135,7 @@ class RhythmAnalyzer:
             RhythmAnalysisError: If beat detection fails.
         """
         if not self.madmom_available:
-            raise DependencyNotAvailableError(
-                "madmom", "beat tracking with DBNBeatTracker"
-            )
+            raise DependencyNotAvailableError("madmom", "beat tracking with DBNBeatTracker")
 
         try:
             from madmom.features.beats import DBNBeatTrackingProcessor, RNNBeatProcessor
@@ -187,9 +185,7 @@ class RhythmAnalyzer:
         """
         if self.config.use_madmom:
             if not self.madmom_available:
-                raise DependencyNotAvailableError(
-                    "madmom", "beat tracking with DBNBeatTracker"
-                )
+                raise DependencyNotAvailableError("madmom", "beat tracking with DBNBeatTracker")
             return self.detect_beats_madmom(audio, sample_rate)
         else:
             return self.detect_beats_librosa(audio, sample_rate)
@@ -282,9 +278,7 @@ class RhythmAnalyzer:
             )
 
             # Filter valid frame indices
-            valid_frames = beat_frames[
-                (beat_frames >= 0) & (beat_frames < len(onset_env))
-            ]
+            valid_frames = beat_frames[(beat_frames >= 0) & (beat_frames < len(onset_env))]
 
             if len(valid_frames) == 0:
                 return 0.0
@@ -397,9 +391,7 @@ class RhythmAnalyzer:
             # Tempo outside expected range, reduce confidence
             tempo_confidence = 0.3
         else:
-            tempo_confidence = self.estimate_tempo_confidence(
-                audio, sample_rate, tempo
-            )
+            tempo_confidence = self.estimate_tempo_confidence(audio, sample_rate, tempo)
 
         # Compute stability
         tempo_stability = self.compute_tempo_stability(beat_times)

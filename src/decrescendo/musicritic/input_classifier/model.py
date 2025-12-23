@@ -235,9 +235,7 @@ class ClassificationHead(nn.Module):
     dtype: jnp.dtype = jnp.float32
 
     @nn.compact
-    def __call__(
-        self, pooled_output: jnp.ndarray, deterministic: bool = True
-    ) -> jnp.ndarray:
+    def __call__(self, pooled_output: jnp.ndarray, deterministic: bool = True) -> jnp.ndarray:
         x = nn.Dropout(rate=self.dropout_rate)(pooled_output, deterministic=deterministic)
         return nn.Dense(
             self.num_classes,

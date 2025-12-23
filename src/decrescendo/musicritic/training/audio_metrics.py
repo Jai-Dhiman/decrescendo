@@ -119,9 +119,7 @@ def aggregate_audio_metrics(
     }
 
     # Aggregate per-category F1
-    f1_per_cat = np.mean(
-        [np.array(m.harm_f1_per_category) for m in metrics_list], axis=0
-    )
+    f1_per_cat = np.mean([np.array(m.harm_f1_per_category) for m in metrics_list], axis=0)
     for i, f1 in enumerate(f1_per_cat):
         aggregated[f"metrics/harm_f1_category_{i}"] = float(f1)
 

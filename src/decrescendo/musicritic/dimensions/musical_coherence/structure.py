@@ -134,9 +134,7 @@ class StructureAnalyzer:
             return similarity
 
         except Exception as e:
-            raise StructureAnalysisError(
-                f"Self-similarity computation failed: {e}"
-            ) from e
+            raise StructureAnalysisError(f"Self-similarity computation failed: {e}") from e
 
     def detect_boundaries(
         self,
@@ -182,9 +180,7 @@ class StructureAnalyzer:
 
             for i in range(half, n_frames - half):
                 # Extract local region
-                region = similarity[
-                    i - half : i + half, i - half : i + half
-                ]
+                region = similarity[i - half : i + half, i - half : i + half]
                 # Compute novelty as correlation with checkerboard
                 if region.shape == (kernel_size, kernel_size):
                     novelty[i] = np.sum(region * kernel)
@@ -198,9 +194,7 @@ class StructureAnalyzer:
 
             # Find peaks
             min_distance = int(
-                self.config.min_section_duration
-                * sample_rate
-                / self.config.hop_length
+                self.config.min_section_duration * sample_rate / self.config.hop_length
             )
             min_distance = max(1, min_distance)
 
@@ -272,9 +266,7 @@ class StructureAnalyzer:
 
             if start_frame < end_frame:
                 # Average similarity within section
-                section_sim = np.mean(
-                    similarity[start_frame:end_frame, start_frame:end_frame]
-                )
+                section_sim = np.mean(similarity[start_frame:end_frame, start_frame:end_frame])
                 section_features.append(section_sim)
             else:
                 section_features.append(0.0)
@@ -304,9 +296,7 @@ class StructureAnalyzer:
                 end_rep = min(end_rep, similarity.shape[0])
 
                 if start_i < end_i and start_rep < end_rep:
-                    cross_sim = np.mean(
-                        similarity[start_i:end_i, start_rep:end_rep]
-                    )
+                    cross_sim = np.mean(similarity[start_i:end_i, start_rep:end_rep])
                     if cross_sim > best_similarity:
                         best_similarity = cross_sim
                         best_match = label
@@ -405,14 +395,10 @@ class StructureAnalyzer:
 
             # Similarity within sections (before and after boundary)
             before = np.mean(similarity[frame - window : frame, frame - window : frame])
-            after = np.mean(
-                similarity[frame : frame + window, frame : frame + window]
-            )
+            after = np.mean(similarity[frame : frame + window, frame : frame + window])
 
             # Similarity across boundary
-            across = np.mean(
-                similarity[frame - window : frame, frame : frame + window]
-            )
+            across = np.mean(similarity[frame - window : frame, frame : frame + window])
 
             # Contrast: high within, low across
             within = (before + after) / 2
@@ -460,15 +446,11 @@ class StructureAnalyzer:
         boundaries = self.detect_boundaries(similarity, sample_rate)
 
         # Label sections
-        sections = self.label_sections(
-            similarity, boundaries, sample_rate, audio_duration
-        )
+        sections = self.label_sections(similarity, boundaries, sample_rate, audio_duration)
 
         # Compute metrics
         repetition_ratio = self.compute_repetition_ratio(sections)
-        structure_clarity = self.compute_structure_clarity(
-            similarity, boundaries, sample_rate
-        )
+        structure_clarity = self.compute_structure_clarity(similarity, boundaries, sample_rate)
 
         return StructureReport(
             section_count=len(sections),
@@ -525,8 +507,6 @@ class StructureAnalyzer:
             section_score = max(0.0, 1.0 - (section_ratio - 2.0) * 0.5)
 
         # Weighted combination
-        score = (
-            0.40 * clarity_score + 0.30 * repetition_score + 0.30 * section_score
-        )
+        score = 0.40 * clarity_score + 0.30 * repetition_score + 0.30 * section_score
 
         return float(np.clip(score, 0.0, 1.0))

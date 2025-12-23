@@ -167,21 +167,15 @@ class VoiceEnroller:
         # Duration check
         duration_sec = len(audio) / sample_rate
         if duration_sec < self.min_duration_sec:
-            issues.append(
-                f"Audio too short: {duration_sec:.1f}s (min: {self.min_duration_sec}s)"
-            )
+            issues.append(f"Audio too short: {duration_sec:.1f}s (min: {self.min_duration_sec}s)")
         if duration_sec > self.max_duration_sec:
-            issues.append(
-                f"Audio too long: {duration_sec:.1f}s (max: {self.max_duration_sec}s)"
-            )
+            issues.append(f"Audio too long: {duration_sec:.1f}s (max: {self.max_duration_sec}s)")
 
         # RMS level check (detect silence/very quiet audio)
         rms = np.sqrt(np.mean(audio**2))
         rms_db = 20 * np.log10(rms + 1e-10)
         if rms_db < self.min_rms_db:
-            issues.append(
-                f"Audio too quiet: {rms_db:.1f}dB (min: {self.min_rms_db}dB)"
-            )
+            issues.append(f"Audio too quiet: {rms_db:.1f}dB (min: {self.min_rms_db}dB)")
 
         # Simple SNR estimation (ratio of signal to noise floor)
         # This is a rough estimate using the top 10% vs bottom 10% of energy
@@ -295,9 +289,7 @@ class VoiceEnroller:
         quality = self.check_audio_quality(audio, sr)
 
         if not quality.passed:
-            raise AudioQualityError(
-                f"Audio quality check failed for {path}: {quality.issues}"
-            )
+            raise AudioQualityError(f"Audio quality check failed for {path}: {quality.issues}")
 
         # Extract embedding
         embedding = self.extract_embedding(audio, sr)
@@ -405,9 +397,7 @@ class VoiceEnroller:
                 )
 
         if len(embeddings) == 0:
-            error_details = "; ".join(
-                f"{p}: {issues}" for p, issues in failed_files
-            )
+            error_details = "; ".join(f"{p}: {issues}" for p, issues in failed_files)
             return EnrollmentResult(
                 success=False,
                 voice_id=None,
@@ -496,9 +486,7 @@ class VoiceEnroller:
         if check_quality:
             quality = self.check_audio_quality(audio, sample_rate)
             if not quality.passed:
-                raise AudioQualityError(
-                    f"Audio quality check failed: {quality.issues}"
-                )
+                raise AudioQualityError(f"Audio quality check failed: {quality.issues}")
 
         embedding = self.extract_embedding(audio, sample_rate)
         return embedding, quality

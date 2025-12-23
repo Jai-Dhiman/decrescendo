@@ -239,9 +239,7 @@ class ArtifactDetector:
 
             # Combine features (weighted average)
             ai_score = (
-                0.3 * smoothness_score
-                + 0.4 * consistency_score
-                + 0.3 * flatness_consistency_score
+                0.3 * smoothness_score + 0.4 * consistency_score + 0.3 * flatness_consistency_score
             )
 
             # Apply a threshold to reduce false positives
@@ -272,9 +270,7 @@ class ArtifactDetector:
             ArtifactDetectionError: If analysis fails.
         """
         click_count, click_timestamps = self.detect_clicks(audio, sample_rate)
-        clip_count, clip_timestamps, clip_severity = self.detect_clipping(
-            audio, sample_rate
-        )
+        clip_count, clip_timestamps, clip_severity = self.detect_clipping(audio, sample_rate)
         ai_score = self.detect_ai_artifacts(audio, sample_rate)
 
         return ArtifactReport(

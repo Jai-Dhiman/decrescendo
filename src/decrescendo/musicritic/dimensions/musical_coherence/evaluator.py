@@ -308,15 +308,11 @@ class MusicalCoherenceEvaluator(BaseDimensionEvaluator):
 
         # Overall assessment
         if coherence_level == "excellent":
-            parts.append(
-                f"Excellent musical coherence (score: {score_100:.1f}/100)."
-            )
+            parts.append(f"Excellent musical coherence (score: {score_100:.1f}/100).")
         elif coherence_level == "good":
             parts.append(f"Good musical coherence (score: {score_100:.1f}/100).")
         elif coherence_level == "moderate":
-            parts.append(
-                f"Moderate musical coherence (score: {score_100:.1f}/100)."
-            )
+            parts.append(f"Moderate musical coherence (score: {score_100:.1f}/100).")
         else:
             parts.append(f"Poor musical coherence (score: {score_100:.1f}/100).")
 
@@ -345,9 +341,7 @@ class MusicalCoherenceEvaluator(BaseDimensionEvaluator):
         repetition_ratio = metadata["repetition_ratio"]
         if section_count > 1:
             if repetition_ratio > 0.3:
-                parts.append(
-                    f"Clear structure with {section_count} sections and repetition."
-                )
+                parts.append(f"Clear structure with {section_count} sections and repetition.")
             else:
                 parts.append(f"Detected {section_count} sections (limited repetition).")
 

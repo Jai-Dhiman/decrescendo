@@ -43,8 +43,7 @@ class FingerprintNotAvailableError(FingerprintError):
     def __init__(self, message: str | None = None) -> None:
         if message is None:
             message = (
-                "Chromaprint (fpcalc) is not available. "
-                "Install with: uv pip install pyacoustid"
+                "Chromaprint (fpcalc) is not available. Install with: uv pip install pyacoustid"
             )
         super().__init__(message)
 

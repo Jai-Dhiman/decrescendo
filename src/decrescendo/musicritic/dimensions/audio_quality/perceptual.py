@@ -94,9 +94,7 @@ class PerceptualAnalyzer:
             return mean_centroid, std_centroid
 
         except Exception as e:
-            raise PerceptualAnalysisError(
-                f"Spectral centroid computation failed: {e}"
-            ) from e
+            raise PerceptualAnalysisError(f"Spectral centroid computation failed: {e}") from e
 
     def compute_spectral_flatness(
         self,
@@ -132,9 +130,7 @@ class PerceptualAnalyzer:
             return mean_flatness, std_flatness
 
         except Exception as e:
-            raise PerceptualAnalysisError(
-                f"Spectral flatness computation failed: {e}"
-            ) from e
+            raise PerceptualAnalysisError(f"Spectral flatness computation failed: {e}") from e
 
     def compute_frequency_balance(
         self,
@@ -184,9 +180,7 @@ class PerceptualAnalyzer:
             return dict(zip(band_names, ratios))
 
         except Exception as e:
-            raise PerceptualAnalysisError(
-                f"Frequency balance computation failed: {e}"
-            ) from e
+            raise PerceptualAnalysisError(f"Frequency balance computation failed: {e}") from e
 
     def compute_bandwidth_utilization(
         self,
@@ -223,9 +217,7 @@ class PerceptualAnalyzer:
             return float(np.clip(utilization, 0.0, 1.0))
 
         except Exception as e:
-            raise PerceptualAnalysisError(
-                f"Bandwidth utilization computation failed: {e}"
-            ) from e
+            raise PerceptualAnalysisError(f"Bandwidth utilization computation failed: {e}") from e
 
     def _compute_balance_deviation(
         self,
@@ -270,12 +262,8 @@ class PerceptualAnalyzer:
         Raises:
             PerceptualAnalysisError: If analysis fails.
         """
-        centroid_mean, centroid_std = self.compute_spectral_centroid(
-            audio, sample_rate
-        )
-        flatness_mean, flatness_std = self.compute_spectral_flatness(
-            audio, sample_rate
-        )
+        centroid_mean, centroid_std = self.compute_spectral_centroid(audio, sample_rate)
+        flatness_mean, flatness_std = self.compute_spectral_flatness(audio, sample_rate)
         frequency_balance = self.compute_frequency_balance(audio, sample_rate)
         bandwidth = self.compute_bandwidth_utilization(audio, sample_rate)
         balance_deviation = self._compute_balance_deviation(frequency_balance)
@@ -336,8 +324,6 @@ class PerceptualAnalyzer:
             bandwidth_score = 0.5 + (1.0 - bandwidth) * 2.5
 
         # Weighted combination
-        score = (
-            0.40 * balance_score + 0.30 * centroid_score + 0.30 * bandwidth_score
-        )
+        score = 0.40 * balance_score + 0.30 * centroid_score + 0.30 * bandwidth_score
 
         return float(np.clip(score, 0.0, 1.0))

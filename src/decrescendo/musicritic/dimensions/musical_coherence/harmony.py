@@ -14,15 +14,10 @@ import numpy as np
 from .config import HarmonyConfig
 from .exceptions import DependencyNotAvailableError, HarmonyAnalysisError
 
-
 # Key profiles for Krumhansl-Schmuckler algorithm
 # Correlation weights for major and minor keys
-KRUMHANSL_MAJOR = np.array(
-    [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88]
-)
-KRUMHANSL_MINOR = np.array(
-    [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17]
-)
+KRUMHANSL_MAJOR = np.array([6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88])
+KRUMHANSL_MINOR = np.array([6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17])
 
 # Pitch class names
 PITCH_CLASSES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
@@ -232,11 +227,7 @@ class HarmonyAnalyzer:
             # Segment chroma into chord-length windows
             frames_per_chord = max(
                 1,
-                int(
-                    self.config.min_chord_duration
-                    * sample_rate
-                    / self.config.hop_length
-                ),
+                int(self.config.min_chord_duration * sample_rate / self.config.hop_length),
             )
 
             chords = []
@@ -309,9 +300,7 @@ class HarmonyAnalyzer:
             HarmonyAnalysisError: If chord detection fails.
         """
         if not self.essentia_available:
-            raise DependencyNotAvailableError(
-                "essentia", "chord detection with Essentia"
-            )
+            raise DependencyNotAvailableError("essentia", "chord detection with Essentia")
 
         try:
             import essentia.standard as es
@@ -319,9 +308,7 @@ class HarmonyAnalyzer:
             # Essentia expects specific sample rate
             if sample_rate != 44100:
                 # Resample to 44100
-                audio = librosa.resample(
-                    audio, orig_sr=sample_rate, target_sr=44100
-                )
+                audio = librosa.resample(audio, orig_sr=sample_rate, target_sr=44100)
                 sample_rate = 44100
 
             # Compute HPCP (Harmonic Pitch Class Profile)
@@ -340,9 +327,7 @@ class HarmonyAnalyzer:
 
             # Process frames
             hpcps = []
-            for frame in es.FrameGenerator(
-                audio, frameSize=frame_size, hopSize=hop_size
-            ):
+            for frame in es.FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size):
                 spectrum = spectrum_algo(frame)
                 freqs, mags = spectral_peaks(spectrum)
                 hpcp = hpcp_algo(freqs, mags)
@@ -398,9 +383,7 @@ class HarmonyAnalyzer:
         """
         if self.config.use_essentia:
             if not self.essentia_available:
-                raise DependencyNotAvailableError(
-                    "essentia", "chord detection with Essentia"
-                )
+                raise DependencyNotAvailableError("essentia", "chord detection with Essentia")
             return self.detect_chords_essentia(audio, sample_rate)
         else:
             return self.detect_chords_chroma(audio, sample_rate)

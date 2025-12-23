@@ -1,10 +1,5 @@
 """Training infrastructure for Constitutional Audio models."""
 
-from .losses import LossOutput, LossWeights, compute_classification_loss
-from .metrics import MetricsOutput, aggregate_metrics, compute_metrics
-from .train_state import TrainState
-from .trainer import Trainer, TrainingConfig, create_optimizer
-
 # Audio-specific training
 from .audio_losses import (
     AudioLossOutput,
@@ -31,6 +26,10 @@ from .audio_trainer import (
     create_audio_train_step,
     initialize_audio_training,
 )
+from .losses import LossOutput, LossWeights, compute_classification_loss
+from .metrics import MetricsOutput, aggregate_metrics, compute_metrics
+from .train_state import TrainState
+from .trainer import Trainer, TrainingConfig, create_optimizer
 
 __all__ = [
     # Train state (text)

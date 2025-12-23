@@ -242,9 +242,7 @@ class MelodyAnalyzer:
         range_score = min(1.0, pitch_range / 24.0)
 
         # Combine features
-        complexity = (
-            0.4 * interval_variety + 0.3 * direction_change_rate + 0.3 * range_score
-        )
+        complexity = 0.4 * interval_variety + 0.3 * direction_change_rate + 0.3 * range_score
 
         return float(np.clip(complexity, 0.0, 1.0))
 
@@ -399,8 +397,6 @@ class MelodyAnalyzer:
         stability_score = report.pitch_stability
 
         # Weighted combination
-        score = (
-            0.35 * voiced_score + 0.30 * complexity_score + 0.35 * stability_score
-        )
+        score = 0.35 * voiced_score + 0.30 * complexity_score + 0.35 * stability_score
 
         return float(np.clip(score, 0.0, 1.0))

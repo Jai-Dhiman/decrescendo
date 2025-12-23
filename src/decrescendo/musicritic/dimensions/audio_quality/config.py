@@ -88,9 +88,7 @@ class AudioQualityConfig:
         min_audio_duration: Minimum audio duration in seconds.
     """
 
-    artifact_config: ArtifactDetectionConfig = field(
-        default_factory=ArtifactDetectionConfig
-    )
+    artifact_config: ArtifactDetectionConfig = field(default_factory=ArtifactDetectionConfig)
     loudness_config: LoudnessConfig = field(default_factory=LoudnessConfig)
     perceptual_config: PerceptualConfig = field(default_factory=PerceptualConfig)
 

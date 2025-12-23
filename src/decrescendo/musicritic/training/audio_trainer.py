@@ -473,9 +473,7 @@ class AudioTrainer:
         Override this method to add W&B logging, TensorBoard, etc.
         """
         prefix_str = f"[{prefix}] " if prefix else ""
-        metrics_str = ", ".join(
-            f"{k.split('/')[-1]}: {v:.4f}" for k, v in metrics.items()
-        )
+        metrics_str = ", ".join(f"{k.split('/')[-1]}: {v:.4f}" for k, v in metrics.items())
         print(f"Step {step} {prefix_str}{metrics_str}")
 
     def _save_checkpoint(self, state: AudioTrainState, step: int) -> None:

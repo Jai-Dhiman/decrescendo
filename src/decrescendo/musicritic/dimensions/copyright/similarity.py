@@ -288,7 +288,7 @@ class RhythmExtractor:
             )
 
             # Handle tempo which may be an array in newer librosa versions
-            tempo_value = float(tempo.item()) if hasattr(tempo, 'item') else float(tempo)
+            tempo_value = float(tempo.item()) if hasattr(tempo, "item") else float(tempo)
 
             return RhythmReport(
                 onset_times=onset_times,
@@ -474,8 +474,12 @@ class SimilarityMatcher:
         if rhythm1.tempo > 0 and rhythm2.tempo > 0:
             tempo_ratio = min(rhythm1.tempo, rhythm2.tempo) / max(rhythm1.tempo, rhythm2.tempo)
             # Also check for double/half tempo
-            double_ratio = min(rhythm1.tempo, rhythm2.tempo * 2) / max(rhythm1.tempo, rhythm2.tempo * 2)
-            half_ratio = min(rhythm1.tempo * 2, rhythm2.tempo) / max(rhythm1.tempo * 2, rhythm2.tempo)
+            double_ratio = min(rhythm1.tempo, rhythm2.tempo * 2) / max(
+                rhythm1.tempo, rhythm2.tempo * 2
+            )
+            half_ratio = min(rhythm1.tempo * 2, rhythm2.tempo) / max(
+                rhythm1.tempo * 2, rhythm2.tempo
+            )
             tempo_sim = max(tempo_ratio, double_ratio, half_ratio)
         else:
             tempo_sim = 0.0

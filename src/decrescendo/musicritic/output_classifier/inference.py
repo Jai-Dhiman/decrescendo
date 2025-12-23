@@ -270,16 +270,11 @@ class OutputClassifierInference:
 
         # Convert to probabilities
         harm_probs = jax.nn.sigmoid(harm_logits)
-        harm_scores = {
-            name: float(harm_probs[i])
-            for i, name in enumerate(HARM_CATEGORY_NAMES)
-        }
+        harm_scores = {name: float(harm_probs[i]) for i, name in enumerate(HARM_CATEGORY_NAMES)}
 
         # Check for flagged categories
         flagged = [
-            name
-            for name, score in harm_scores.items()
-            if score > self.config.flag_threshold
+            name for name, score in harm_scores.items() if score > self.config.flag_threshold
         ]
 
         # Speaker matching
@@ -383,9 +378,7 @@ class OutputClassifierInference:
             result = self.classify_chunk(chunk)
 
             # Add to aggregator
-            scores_array = np.array(
-                [result.harm_scores[name] for name in HARM_CATEGORY_NAMES]
-            )
+            scores_array = np.array([result.harm_scores[name] for name in HARM_CATEGORY_NAMES])
             self.aggregator.add_scores(scores_array)
 
             yield result
@@ -415,9 +408,7 @@ class OutputClassifierInference:
                 best_speaker_match = result.speaker_match
 
             # Add to aggregator
-            scores_array = np.array(
-                [result.harm_scores[name] for name in HARM_CATEGORY_NAMES]
-            )
+            scores_array = np.array([result.harm_scores[name] for name in HARM_CATEGORY_NAMES])
             self.aggregator.add_scores(scores_array)
 
         return self._aggregate_results(chunk_results, best_speaker_match)
@@ -447,9 +438,7 @@ class OutputClassifierInference:
             if result.speaker_match.similarity > best_speaker_match.similarity:
                 best_speaker_match = result.speaker_match
 
-            scores_array = np.array(
-                [result.harm_scores[name] for name in HARM_CATEGORY_NAMES]
-            )
+            scores_array = np.array([result.harm_scores[name] for name in HARM_CATEGORY_NAMES])
             self.aggregator.add_scores(scores_array)
 
         return self._aggregate_results(chunk_results, best_speaker_match)
@@ -481,19 +470,10 @@ class OutputClassifierInference:
 
         # Get max scores across all chunks
         max_scores = self.aggregator.get_max_scores()
-        harm_scores = {
-            name: float(max_scores[i])
-            for i, name in enumerate(HARM_CATEGORY_NAMES)
-        }
+        harm_scores = {name: float(max_scores[i]) for i, name in enumerate(HARM_CATEGORY_NAMES)}
 
         # Collect all flagged categories
-        flagged = list(
-            set(
-                cat
-                for result in chunk_results
-                for cat in result.flagged_categories
-            )
-        )
+        flagged = list(set(cat for result in chunk_results for cat in result.flagged_categories))
 
         # Make final decision
         decision, reasons = self._make_final_decision(
@@ -530,8 +510,7 @@ class OutputClassifierInference:
 
         # Check for any blocking chunks
         blocking_chunks = [
-            i for i, r in enumerate(chunk_results)
-            if r.chunk_decision == Decision.BLOCK
+            i for i, r in enumerate(chunk_results) if r.chunk_decision == Decision.BLOCK
         ]
         if blocking_chunks:
             reasons.append(f"Blocking content detected in chunks: {blocking_chunks}")
@@ -541,8 +520,7 @@ class OutputClassifierInference:
         max_harm = max(harm_scores.values())
         if max_harm >= self.config.block_threshold:
             high_categories = [
-                name for name, score in harm_scores.items()
-                if score >= self.config.block_threshold
+                name for name, score in harm_scores.items() if score >= self.config.block_threshold
             ]
             reasons.append(f"High harm scores in categories: {high_categories}")
             return Decision.BLOCK, reasons
@@ -558,8 +536,7 @@ class OutputClassifierInference:
         # Check for flagging
         if max_harm >= self.config.flag_threshold:
             flagged_categories = [
-                name for name, score in harm_scores.items()
-                if score >= self.config.flag_threshold
+                name for name, score in harm_scores.items() if score >= self.config.flag_threshold
             ]
             reasons.append(f"Elevated harm scores in: {flagged_categories}")
             return Decision.FLAG_FOR_REVIEW, reasons

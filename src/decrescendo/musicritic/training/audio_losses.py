@@ -58,9 +58,7 @@ def harm_classification_loss(
         ValueError: If logits and labels have incompatible shapes
     """
     if logits.shape != labels.shape:
-        raise ValueError(
-            f"logits shape {logits.shape} must match labels shape {labels.shape}"
-        )
+        raise ValueError(f"logits shape {logits.shape} must match labels shape {labels.shape}")
 
     # Apply label smoothing if specified
     if label_smoothing > 0:

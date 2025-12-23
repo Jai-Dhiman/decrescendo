@@ -128,11 +128,15 @@ def aggregate_metrics(metrics_list: list[MetricsOutput]) -> dict[str, float]:
 
     # Aggregate each field of MetricsOutput
     aggregated = {
-        "metrics/intent_accuracy": sum(float(m.intent_accuracy) for m in metrics_list) / len(metrics_list),
-        "metrics/artist_accuracy": sum(float(m.artist_accuracy) for m in metrics_list) / len(metrics_list),
-        "metrics/voice_accuracy": sum(float(m.voice_accuracy) for m in metrics_list) / len(metrics_list),
+        "metrics/intent_accuracy": sum(float(m.intent_accuracy) for m in metrics_list)
+        / len(metrics_list),
+        "metrics/artist_accuracy": sum(float(m.artist_accuracy) for m in metrics_list)
+        / len(metrics_list),
+        "metrics/voice_accuracy": sum(float(m.voice_accuracy) for m in metrics_list)
+        / len(metrics_list),
         "metrics/policy_f1": sum(float(m.policy_f1) for m in metrics_list) / len(metrics_list),
-        "metrics/policy_accuracy": sum(float(m.policy_accuracy) for m in metrics_list) / len(metrics_list),
+        "metrics/policy_accuracy": sum(float(m.policy_accuracy) for m in metrics_list)
+        / len(metrics_list),
     }
 
     return aggregated

@@ -100,9 +100,7 @@ class LoudnessAnalyzer:
                 return -70.0  # Return a very low value for silence
             return float(loudness)
         except Exception as e:
-            raise LoudnessAnalysisError(
-                f"Failed to measure integrated loudness: {e}"
-            ) from e
+            raise LoudnessAnalysisError(f"Failed to measure integrated loudness: {e}") from e
 
     def measure_loudness_range(
         self,
@@ -158,9 +156,7 @@ class LoudnessAnalyzer:
             return lra
 
         except Exception as e:
-            raise LoudnessAnalysisError(
-                f"Failed to measure loudness range: {e}"
-            ) from e
+            raise LoudnessAnalysisError(f"Failed to measure loudness range: {e}") from e
 
     def measure_true_peak(
         self,
@@ -210,9 +206,7 @@ class LoudnessAnalyzer:
             return float(true_peak_dbtp)
 
         except Exception as e:
-            raise LoudnessAnalysisError(
-                f"Failed to measure true peak: {e}"
-            ) from e
+            raise LoudnessAnalysisError(f"Failed to measure true peak: {e}") from e
 
     def analyze(
         self,
@@ -245,9 +239,7 @@ class LoudnessAnalyzer:
 
         # Check compliance
         true_peak_compliant = true_peak <= self.config.max_true_peak_dbtp
-        dynamic_range_appropriate = (
-            self.config.min_lra <= loudness_range <= self.config.max_lra
-        )
+        dynamic_range_appropriate = self.config.min_lra <= loudness_range <= self.config.max_lra
 
         # Overall streaming compliance:
         # - LUFS within +/- 2 of target

@@ -11,22 +11,25 @@ from typing import Any
 
 import numpy as np
 
+from .input_classifier.checkpointing import load_input_classifier_inference
 from .input_classifier.inference import (
     ClassificationResult,
-    Decision as InputDecision,
     InferenceConfig,
     InputClassifierInference,
 )
-from .input_classifier.checkpointing import load_input_classifier_inference
+from .input_classifier.inference import (
+    Decision as InputDecision,
+)
+from .output_classifier.checkpointing import load_output_classifier_inference
+from .output_classifier.config import OutputClassifierConfig
 from .output_classifier.inference import (
     AggregatedResult,
-    Decision as OutputDecision,
     OutputClassifierInference,
 )
-from .output_classifier.config import OutputClassifierConfig
-from .output_classifier.checkpointing import load_output_classifier_inference
+from .output_classifier.inference import (
+    Decision as OutputDecision,
+)
 from .output_classifier.voice_database import VoiceDatabase
-
 
 # -----------------------------------------------------------------------------
 # Exceptions
@@ -34,20 +37,14 @@ from .output_classifier.voice_database import VoiceDatabase
 
 
 class PipelineError(Exception):
-    """Base exception for pipeline operations."""
-
     pass
 
 
 class PipelineConfigError(PipelineError):
-    """Raised when pipeline configuration is invalid."""
-
     pass
 
 
 class ClassifierNotEnabledError(PipelineError):
-    """Raised when attempting to use a disabled classifier."""
-
     pass
 
 
@@ -57,15 +54,6 @@ class ClassifierNotEnabledError(PipelineError):
 
 
 class PipelineDecision(Enum):
-    """Unified decision for the Constitutional Audio pipeline.
-
-    Maps decisions from both classifiers:
-    - Input classifier: ALLOW, FLAG_FOR_REVIEW, BLOCK
-    - Output classifier: CONTINUE, FLAG_FOR_REVIEW, BLOCK
-
-    ALLOW corresponds to both Input ALLOW and Output CONTINUE.
-    """
-
     ALLOW = "ALLOW"
     FLAG_FOR_REVIEW = "FLAG_FOR_REVIEW"
     BLOCK = "BLOCK"
@@ -105,9 +93,7 @@ class PipelineConfig:
             PipelineConfigError: If configuration is invalid.
         """
         if not self.enable_input_classifier and not self.enable_output_classifier:
-            raise PipelineConfigError(
-                "At least one classifier must be enabled"
-            )
+            raise PipelineConfigError("At least one classifier must be enabled")
 
 
 # -----------------------------------------------------------------------------
@@ -272,13 +258,9 @@ class ConstitutionalAudio:
             PipelineConfigError: If required classifiers are missing.
         """
         if self.config.enable_input_classifier and self._input_classifier is None:
-            raise PipelineConfigError(
-                "Input classifier is enabled but no classifier was provided"
-            )
+            raise PipelineConfigError("Input classifier is enabled but no classifier was provided")
         if self.config.enable_output_classifier and self._output_classifier is None:
-            raise PipelineConfigError(
-                "Output classifier is enabled but no classifier was provided"
-            )
+            raise PipelineConfigError("Output classifier is enabled but no classifier was provided")
 
     @property
     def input_classifier(self) -> InputClassifierInference | None:
@@ -431,29 +413,25 @@ class ConstitutionalAudio:
         if prompt is not None and self.config.enable_input_classifier:
             prompt_result = self.classify_prompt(prompt)
             if prompt_result.decision == PipelineDecision.BLOCK:
-                reasons.extend([
-                    f"Prompt blocked: {r}"
-                    for r in prompt_result.input_result.decision_reasons
-                ])
+                reasons.extend(
+                    [f"Prompt blocked: {r}" for r in prompt_result.input_result.decision_reasons]
+                )
             elif prompt_result.decision == PipelineDecision.FLAG_FOR_REVIEW:
-                reasons.extend([
-                    f"Prompt flagged: {r}"
-                    for r in prompt_result.input_result.decision_reasons
-                ])
+                reasons.extend(
+                    [f"Prompt flagged: {r}" for r in prompt_result.input_result.decision_reasons]
+                )
 
         # Classify audio
         if audio is not None and self.config.enable_output_classifier:
             audio_result = self.classify_audio(audio, sample_rate)
             if audio_result.decision == PipelineDecision.BLOCK:
-                reasons.extend([
-                    f"Audio blocked: {r}"
-                    for r in audio_result.output_result.decision_reasons
-                ])
+                reasons.extend(
+                    [f"Audio blocked: {r}" for r in audio_result.output_result.decision_reasons]
+                )
             elif audio_result.decision == PipelineDecision.FLAG_FOR_REVIEW:
-                reasons.extend([
-                    f"Audio flagged: {r}"
-                    for r in audio_result.output_result.decision_reasons
-                ])
+                reasons.extend(
+                    [f"Audio flagged: {r}" for r in audio_result.output_result.decision_reasons]
+                )
 
         # Aggregate decisions
         decision = self._aggregate_decisions(prompt_result, audio_result)

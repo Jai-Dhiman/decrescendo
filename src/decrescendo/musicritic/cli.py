@@ -19,7 +19,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 # Output format constants
 FORMAT_JSON = "json"
 FORMAT_TABLE = "table"
@@ -193,8 +192,7 @@ def cmd_classify_prompt(args: argparse.Namespace) -> int:
 
     if not args.input_checkpoint:
         raise CheckpointNotProvidedError(
-            "Input classifier checkpoint is required. "
-            "Use --input-checkpoint to specify the path."
+            "Input classifier checkpoint is required. Use --input-checkpoint to specify the path."
         )
 
     # Load pipeline (input classifier only)
@@ -236,8 +234,7 @@ def cmd_classify_audio(args: argparse.Namespace) -> int:
 
     if not args.output_checkpoint:
         raise CheckpointNotProvidedError(
-            "Output classifier checkpoint is required. "
-            "Use --output-checkpoint to specify the path."
+            "Output classifier checkpoint is required. Use --output-checkpoint to specify the path."
         )
 
     # Validate file exists
@@ -290,9 +287,7 @@ def cmd_enroll_voice(args: argparse.Namespace) -> int:
         )
 
     if not args.voice_db:
-        raise CLIError(
-            "Voice database path is required. Use --voice-db to specify the path."
-        )
+        raise CLIError("Voice database path is required. Use --voice-db to specify the path.")
 
     # Validate audio files exist
     audio_paths = [Path(f) for f in args.files]
@@ -360,9 +355,7 @@ def cmd_list_voices(args: argparse.Namespace) -> int:
     from .output_classifier.voice_database import VoiceDatabase
 
     if not args.voice_db:
-        raise CLIError(
-            "Voice database path is required. Use --voice-db to specify the path."
-        )
+        raise CLIError("Voice database path is required. Use --voice-db to specify the path.")
 
     voice_db_path = Path(args.voice_db)
     if not voice_db_path.exists():
@@ -544,7 +537,7 @@ Examples:
     enroll_parser.add_argument(
         "--metadata",
         type=str,
-        help="JSON metadata for the voice (e.g., '{\"genre\": \"pop\"}')",
+        help='JSON metadata for the voice (e.g., \'{"genre": "pop"}\')',
     )
     enroll_parser.add_argument(
         "--format",

@@ -279,15 +279,11 @@ class InputClassifierInference:
         voice_idx = int(jnp.argmax(voice_probs))
         voice_request = VoiceRequest(voice_idx)
         voice_confidence = float(voice_probs[voice_idx])
-        voice_probabilities = {
-            label: float(voice_probs[i]) for i, label in enumerate(VOICE_LABELS)
-        }
+        voice_probabilities = {label: float(voice_probs[i]) for i, label in enumerate(VOICE_LABELS)}
 
         # Policy violations (sigmoid for multi-label)
         policy_probs = jax.nn.sigmoid(outputs["policy_logits"][0])
-        policy_violations = {
-            label: float(policy_probs[i]) for i, label in enumerate(POLICY_LABELS)
-        }
+        policy_violations = {label: float(policy_probs[i]) for i, label in enumerate(POLICY_LABELS)}
         policy_flags = [
             label
             for label, score in policy_violations.items()

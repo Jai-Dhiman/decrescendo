@@ -101,9 +101,7 @@ class CLAPEncoder:
             self._model = ClapModel.from_pretrained(self.config.model_name)
             self._model.eval()  # Set to evaluation mode
         except Exception as e:
-            raise CLAPLoadError(
-                f"Failed to load CLAP model '{self.config.model_name}': {e}"
-            ) from e
+            raise CLAPLoadError(f"Failed to load CLAP model '{self.config.model_name}': {e}") from e
 
     def encode_text(
         self,
@@ -183,15 +181,10 @@ class CLAPEncoder:
         target_sr = self.config.sample_rate
         if sample_rate != target_sr:
             if single_input:
-                audio = librosa.resample(
-                    audio, orig_sr=sample_rate, target_sr=target_sr
-                )
+                audio = librosa.resample(audio, orig_sr=sample_rate, target_sr=target_sr)
             else:
                 audio = np.array(
-                    [
-                        librosa.resample(a, orig_sr=sample_rate, target_sr=target_sr)
-                        for a in audio
-                    ]
+                    [librosa.resample(a, orig_sr=sample_rate, target_sr=target_sr) for a in audio]
                 )
 
         # Ensure correct shape for processor: list of arrays

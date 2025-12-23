@@ -75,9 +75,7 @@ def load_mert_encoder(
         return model, processor, hidden_size
 
     except Exception as e:
-        raise PretrainedAudioLoadError(
-            f"Failed to load MERT model '{model_name}': {e}"
-        ) from e
+        raise PretrainedAudioLoadError(f"Failed to load MERT model '{model_name}': {e}") from e
 
 
 def load_wavlm_encoder(
@@ -112,9 +110,7 @@ def load_wavlm_encoder(
         return model, processor, hidden_size
 
     except Exception as e:
-        raise PretrainedAudioLoadError(
-            f"Failed to load WavLM model '{model_name}': {e}"
-        ) from e
+        raise PretrainedAudioLoadError(f"Failed to load WavLM model '{model_name}': {e}") from e
 
 
 class PretrainedAudioEncoderWrapper:
@@ -523,8 +519,7 @@ def create_pretrained_training_setup(
         )
     else:
         raise PretrainedAudioLoadError(
-            f"Unknown pretrained model type: {pretrained_config.model_name}. "
-            "Supported: MERT, WavLM"
+            f"Unknown pretrained model type: {pretrained_config.model_name}. Supported: MERT, WavLM"
         )
 
     # Create classifier

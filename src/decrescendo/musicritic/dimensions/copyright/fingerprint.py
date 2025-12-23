@@ -363,9 +363,7 @@ class FingerprintDatabase:
         # Compute similarities
         similarities = []
         for entry_id, entry in self._entries.items():
-            sim = ChromaprintEncoder.compare_fingerprints(
-                query_fingerprint, entry.fingerprint
-            )
+            sim = ChromaprintEncoder.compare_fingerprints(query_fingerprint, entry.fingerprint)
             if sim >= threshold:
                 similarities.append((entry_id, sim))
 

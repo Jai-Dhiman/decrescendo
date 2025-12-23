@@ -85,9 +85,7 @@ class AudioQualityEvaluator(BaseDimensionEvaluator):
     def perceptual_analyzer(self) -> PerceptualAnalyzer:
         """Lazily initialize and return perceptual analyzer."""
         if self._perceptual_analyzer is None:
-            self._perceptual_analyzer = PerceptualAnalyzer(
-                self.config.perceptual_config
-            )
+            self._perceptual_analyzer = PerceptualAnalyzer(self.config.perceptual_config)
         return self._perceptual_analyzer
 
     def _evaluate_impl(
@@ -280,21 +278,13 @@ class AudioQualityEvaluator(BaseDimensionEvaluator):
 
         # Overall assessment
         if quality_level == "excellent":
-            parts.append(
-                f"Excellent audio quality (score: {score_100:.1f}/100)."
-            )
+            parts.append(f"Excellent audio quality (score: {score_100:.1f}/100).")
         elif quality_level == "good":
-            parts.append(
-                f"Good audio quality (score: {score_100:.1f}/100)."
-            )
+            parts.append(f"Good audio quality (score: {score_100:.1f}/100).")
         elif quality_level == "acceptable":
-            parts.append(
-                f"Acceptable audio quality (score: {score_100:.1f}/100)."
-            )
+            parts.append(f"Acceptable audio quality (score: {score_100:.1f}/100).")
         else:
-            parts.append(
-                f"Poor audio quality (score: {score_100:.1f}/100)."
-            )
+            parts.append(f"Poor audio quality (score: {score_100:.1f}/100).")
 
         # Streaming compliance
         if streaming_compliant:

@@ -13,9 +13,9 @@ import jax.numpy as jnp
 import numpy as np
 
 from .checkpointing import (
-    VoiceEntry,
     VoiceDatabaseError,
     VoiceDatabaseNotFoundError,
+    VoiceEntry,
     load_voice_database,
     save_voice_database,
 )

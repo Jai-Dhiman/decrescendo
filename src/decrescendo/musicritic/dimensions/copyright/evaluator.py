@@ -96,9 +96,7 @@ class CopyrightEvaluator(BaseDimensionEvaluator):
         Returns None if Chromaprint is not available.
         """
         if self._fingerprint_encoder is None and is_chromaprint_available():
-            self._fingerprint_encoder = ChromaprintEncoder(
-                self.config.fingerprint_config
-            )
+            self._fingerprint_encoder = ChromaprintEncoder(self.config.fingerprint_config)
         return self._fingerprint_encoder
 
     @property
@@ -225,9 +223,8 @@ class CopyrightEvaluator(BaseDimensionEvaluator):
                 # Resample reference if needed
                 if ref_sr != sample_rate:
                     import librosa
-                    ref_audio = librosa.resample(
-                        ref_audio, orig_sr=ref_sr, target_sr=sample_rate
-                    )
+
+                    ref_audio = librosa.resample(ref_audio, orig_sr=ref_sr, target_sr=sample_rate)
 
                 report = self.similarity_matcher.compare(audio, ref_audio, sample_rate)
 
@@ -432,9 +429,7 @@ class CopyrightEvaluator(BaseDimensionEvaluator):
                 f"Potential similarity detected (originality: {originality:.0f}%). {decision.value} for human review."
             )
         else:
-            parts.append(
-                f"Original content (originality: {originality:.0f}%). {decision.value}."
-            )
+            parts.append(f"Original content (originality: {originality:.0f}%). {decision.value}.")
 
         # Fingerprint matches
         fp_matches = metadata.get("fingerprint_matches", [])
@@ -456,7 +451,10 @@ class CopyrightEvaluator(BaseDimensionEvaluator):
 
         # No references warning
         if not metadata.get("fingerprint_matches") and not metadata.get("similarity_matches"):
-            if metadata.get("reference_count", 0) == 0 and metadata.get("fingerprint_db_size", 0) == 0:
+            if (
+                metadata.get("reference_count", 0) == 0
+                and metadata.get("fingerprint_db_size", 0) == 0
+            ):
                 parts.append("Note: No reference database available for comparison.")
 
         return " ".join(parts)

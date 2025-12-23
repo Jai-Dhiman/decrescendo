@@ -13,7 +13,6 @@ Usage:
 
 from __future__ import annotations
 
-import io
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -24,8 +23,7 @@ try:
     from pydantic import BaseModel, Field
 except ImportError as e:
     raise ImportError(
-        "FastAPI is required for the API server. "
-        "Install with: pip install decrescendo[serve]"
+        "FastAPI is required for the API server. Install with: pip install decrescendo[serve]"
     ) from e
 
 
@@ -60,9 +58,7 @@ class VoiceEnrollRequest(BaseModel):
     """Request body for voice enrollment."""
 
     name: str = Field(..., description="Name for the voice (e.g., artist name)")
-    metadata: dict[str, Any] | None = Field(
-        default=None, description="Optional metadata"
-    )
+    metadata: dict[str, Any] | None = Field(default=None, description="Optional metadata")
 
 
 class VoiceEntry(BaseModel):
@@ -151,9 +147,7 @@ def create_app(
                 create_voice_enroller_from_inference,
             )
 
-            _voice_enroller = create_voice_enroller_from_inference(
-                _pipeline.output_classifier
-            )
+            _voice_enroller = create_voice_enroller_from_inference(_pipeline.output_classifier)
 
     # -------------------------------------------------------------------------
     # Health Endpoint
@@ -190,8 +184,7 @@ def create_app(
         if _pipeline is None or _pipeline.input_classifier is None:
             raise HTTPException(
                 status_code=503,
-                detail="Input classifier not loaded. "
-                "Start server with --input-checkpoint.",
+                detail="Input classifier not loaded. Start server with --input-checkpoint.",
             )
 
         result = _pipeline.classify_prompt(request.prompt)
@@ -207,8 +200,7 @@ def create_app(
         if _pipeline is None or _pipeline.output_classifier is None:
             raise HTTPException(
                 status_code=503,
-                detail="Output classifier not loaded. "
-                "Start server with --output-checkpoint.",
+                detail="Output classifier not loaded. Start server with --output-checkpoint.",
             )
 
         # Save uploaded file to temp location
@@ -235,9 +227,7 @@ def create_app(
         At least one of prompt or file must be provided.
         """
         if _pipeline is None:
-            raise HTTPException(
-                status_code=503, detail="Pipeline not loaded."
-            )
+            raise HTTPException(status_code=503, detail="Pipeline not loaded.")
 
         if prompt is None and file is None:
             raise HTTPException(
@@ -274,8 +264,7 @@ def create_app(
         if _voice_database is None:
             raise HTTPException(
                 status_code=503,
-                detail="Voice database not loaded. "
-                "Start server with --voice-db.",
+                detail="Voice database not loaded. Start server with --voice-db.",
             )
 
         entries = _voice_database.list_voices()
@@ -307,15 +296,13 @@ def create_app(
         if _voice_database is None:
             raise HTTPException(
                 status_code=503,
-                detail="Voice database not loaded. "
-                "Start server with --voice-db.",
+                detail="Voice database not loaded. Start server with --voice-db.",
             )
 
         if _voice_enroller is None:
             raise HTTPException(
                 status_code=503,
-                detail="Voice enroller not available. "
-                "Start server with --output-checkpoint.",
+                detail="Voice enroller not available. Start server with --output-checkpoint.",
             )
 
         # Parse metadata if provided
@@ -326,9 +313,7 @@ def create_app(
             try:
                 parsed_metadata = json.loads(metadata)
             except json.JSONDecodeError as e:
-                raise HTTPException(
-                    status_code=400, detail=f"Invalid metadata JSON: {e}"
-                ) from e
+                raise HTTPException(status_code=400, detail=f"Invalid metadata JSON: {e}") from e
 
         # Save uploaded file to temp location
         suffix = Path(file.filename).suffix if file.filename else ".wav"
@@ -376,8 +361,7 @@ def create_app(
         if _voice_database is None:
             raise HTTPException(
                 status_code=503,
-                detail="Voice database not loaded. "
-                "Start server with --voice-db.",
+                detail="Voice database not loaded. Start server with --voice-db.",
             )
 
         from .output_classifier.voice_database import VoiceNotFoundError
@@ -413,8 +397,7 @@ def create_app(
         if _voice_database is None:
             raise HTTPException(
                 status_code=503,
-                detail="Voice database not loaded. "
-                "Start server with --voice-db.",
+                detail="Voice database not loaded. Start server with --voice-db.",
             )
 
         from .output_classifier.voice_database import VoiceNotFoundError

@@ -166,7 +166,9 @@ def _transfer_encoder_params(
         hf_layer_key = str(i)
 
         if hf_layer_key in hf_layers and layer_key in our_encoder:
-            result[layer_key] = _transfer_layer_params(hf_layers[hf_layer_key], our_encoder[layer_key])
+            result[layer_key] = _transfer_layer_params(
+                hf_layers[hf_layer_key], our_encoder[layer_key]
+            )
 
     return result
 

@@ -345,9 +345,7 @@ class Trainer:
 
         return self._average_metrics(all_metrics)
 
-    def _average_metrics(
-        self, metrics_list: list[dict[str, jnp.ndarray]]
-    ) -> dict[str, float]:
+    def _average_metrics(self, metrics_list: list[dict[str, jnp.ndarray]]) -> dict[str, float]:
         """Average metrics across batches."""
         if not metrics_list:
             return {}
