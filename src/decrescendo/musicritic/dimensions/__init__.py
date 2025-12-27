@@ -25,11 +25,31 @@ from .base import (
     QualityDimension,
     SafetyDimension,
 )
+
+# Quality Dimensions
 from .prompt_adherence import (
     CLAPEncoder,
     CLAPEncoderConfig,
     PromptAdherenceConfig,
     PromptAdherenceEvaluator,
+)
+from .musical_coherence import (
+    MusicalCoherenceConfig,
+    MusicalCoherenceEvaluator,
+)
+from .audio_quality import (
+    AudioQualityConfig,
+    AudioQualityEvaluator,
+)
+from .musicality import (
+    MusicalityConfig,
+    MusicalityEvaluator,
+)
+
+# Safety Dimensions
+from .copyright import (
+    CopyrightConfig,
+    CopyrightEvaluator,
 )
 
 __all__ = [
@@ -42,9 +62,21 @@ __all__ = [
     "EvaluationConfig",
     "QualityDimension",
     "SafetyDimension",
-    # Prompt Adherence
+    # Prompt Adherence (Dimension 1)
+    "PromptAdherenceEvaluator",
+    "PromptAdherenceConfig",
     "CLAPEncoder",
     "CLAPEncoderConfig",
-    "PromptAdherenceConfig",
-    "PromptAdherenceEvaluator",
+    # Musical Coherence (Dimension 2)
+    "MusicalCoherenceEvaluator",
+    "MusicalCoherenceConfig",
+    # Audio Quality (Dimension 3)
+    "AudioQualityEvaluator",
+    "AudioQualityConfig",
+    # Musicality (Dimension 4)
+    "MusicalityEvaluator",
+    "MusicalityConfig",
+    # Copyright (Dimension 5)
+    "CopyrightEvaluator",
+    "CopyrightConfig",
 ]
